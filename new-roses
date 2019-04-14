@@ -12,8 +12,8 @@
 source "${HOME}/.config/api_keys"
 
 # default search keyword (this is ran
-# if no arguments are privided
-keyword="spring"
+# if no arguments are provided)
+defaultkeyword="spring"
 
 wallpaper="/tmp/wallpaper.png"
 colorloversbadge="/tmp/colorloversbadge.png"
@@ -74,6 +74,10 @@ searchterm() {
 	searchon="true"
 }
 
+variables() {
+	variableson="true"
+}
+
 # this is where we read apis
 # as well as set the wallpaper 
 # or `wal` palette
@@ -88,7 +92,10 @@ setwal() {
 	entry="$((RANDOM%20))"
 	# do colorlovers stuff all here
 	# it performs the same regardless of if search is on or not
-	if [[ $colorloverson ]] ; then
+	if [[ $colorloverson ]]
+	then
+		if [[ -z $wallpaperonly ]]
+		then
 			# grab json for colorlovers
 			colorloversurl="http://www.colourlovers.com/api/palettes/top&format=json&numResults=20&keywords=$keyword"
 			colorloversjson=$(curl -s "$colorloversurl")
@@ -100,7 +107,8 @@ setwal() {
 			composite /tmp/gradient.png -compose Soft_light "$colorloversbadge" "$colorloverswal"
 			# set `wal` with no wallpaper
 			rm -rf "${HOME}"/.cache/wal/schemes/_tmp*
-			wal -i "$colorloverswal" -n $background $lightmode 
+			wal -i "$colorloverswal" -q -n $background $lightmode 
+		fi
 	fi
 	# do all unsplash stuff here
 	if [[ $unsplashon ]] ; then
@@ -151,8 +159,20 @@ setwal() {
 }
 
 notify() {
-	if [[ $notifications ]]; then
-		notify-send -i "$wallpaper" -m "photo by $username ($userscreenname)"
+	if [[ $notifications ]]
+	then
+		if [[ $colorloverson ]]
+		then
+			echo "fix colorlovers notify"
+		fi
+		if [[ $unsplashon ]]
+		then
+			notify-send -i "$wallpaper" -m "photo by $username ($userscreenname)"
+		fi
+		if [[ $savefile ]]
+		then
+			notify-send -m "saved $savefile.png" -i "$savefile.png"
+		fi	
 	fi
 }
 
@@ -167,8 +187,23 @@ credits() {
 	fi
 	if [[ $colorloverson ]]
 	then
-		echo ""
-		echo ""
+		echo "color palette by ___"
+		echo "provided by colorlovers.com"
+	fi
+	if [[ $variableson ]]
+	then
+		echo "image url: $image"
+		echo "unsplash api key: $unsplashapi"
+		echo "unsplash api url: $unsplashurl"
+		echo "search keyword: $keyword"
+		echo "entry number: $entry"
+		echo "photo page: $photourl"
+		echo "author: $username ( $userscreenname )"
+		echo "author's profile: $userurl"
+		echo "photo supplied by https://unsplash.com/"
+		echo "colorlovers api url: $colorloversurl"
+		echo "colorlovers image url: $colorloversimage"
+		echo "colorlovers title: $colorloverstitle"
 	fi
 }
 
@@ -176,30 +211,16 @@ save() {
 	savedir="$2"
 	savename="$1"
 	savefile="${savedir:-${HOME}/Downloads}/${savename:-wallpaper}"
-	if [[ -e "$savefile.png" ]]
-	then
-		i=0
-		savefile="${savedir:-${HOME}/Downloads}/${savename:-wallpaper}$((++i))"
+	if [[ -e $savefile.png ]] ; then
+    i=0
+    while [[ -e $savefile-$i.png ]] 
+	do
+        let i++
+    done
+    savefile=$savefile-$i
 	fi
 	cp "$wallpaper" "$savefile.png" &&
 	echo "$savefile.png saved" &
-	notify-send -m "saved $savefile.png" -i "$savefile.png"
-	exit
-}
-
-variables() {
-	echo "image url: $image"
-	echo "unsplash api key: $unsplashapi"
-	echo "unsplash api url: $unsplashurl"
-	echo "search keyword: $keyword"
-	echo "entry number: $entry"
-	echo "photo page: $photourl"
-	echo "author: $username ( $userscreenname )"
-	echo "author's profile: $userurl"
-	echo "photo supplied by https://unsplash.com/"
-	echo "colorlovers api url: $colorloversurl"
-	echo "colorlovers image url: $colorloversimage"
-	echo "colorlovers title: $colorloverstitle"
 	exit
 }
 
@@ -218,7 +239,7 @@ help() {
 }
 
 flags() {
-	while getopts ucfb:lws:dnxh opt; do
+	while getopts ucfb:lws:d:nxh opt; do
 		case $opt in
 			u)
 			unsplash
@@ -252,6 +273,9 @@ flags() {
 			;;
 			*)
 			;;
+			*.*)
+			wallpaper "$@"
+			;;
 		esac
 	done
 }
@@ -269,6 +293,7 @@ if [ "$#" -ne 0 ]; then
 	credits
 else
 	getapi
+	keyword="$defaultkeyword"
 	setwal
 	notify
 	credits
@@ -281,3 +306,4 @@ fi
 # save function only appends "1" and then overwrites
 # add credits for colorlovers (jq)
 # stop using `wallpaper` to set wallpaper
+# improve notifications
