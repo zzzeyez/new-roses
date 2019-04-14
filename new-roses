@@ -280,3 +280,4 @@ fi
 
 # save function only appends "1" and then overwrites
 # add credits for colorlovers (jq)
+# stop using `wallpaper` to set wallpaper
