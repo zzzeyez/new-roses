@@ -1,0 +1,282 @@
+#!/usr/bin/env bash
+#
+# author: daniel neemann (@zzzeyez)
+#
+# grabs image from Unsplash and sets as wallpaper
+#
+# requires `wal`, `imagemagick` and `jq`
+
+# requires API key from https://unsplash.com/developers
+# add the API key to the end of line 19,
+# uncomment line 19 and then comment line 13
+source "${HOME}/.config/api_keys"
+
+# default search keyword (this is ran
+# if no arguments are privided
+keyword="spring"
+
+wallpaper="/tmp/wallpaper.png"
+colorloversbadge="/tmp/colorloversbadge.png"
+colorloverswal="/tmp/wal.png"
+lightmode=""
+background=""
+nowallpaper=""
+
+getapi() {
+#	unsplashapi=
+	if [[ $unsplashon ]]
+		then
+		if [[ -z $unsplashapi ]]
+		then
+			printf \
+			"\nREQUIREMENT: GET YOUR OWN API KEY AT: \n \n"
+			printf "https://unsplash.com/developers \n \n"
+			printf "and then use it like so: \n \n"
+			printf \
+			"touch \"\${HOME}/.config/api_keys\" && "
+			printf \
+			"echo \"unsplashapi=YOUR_API_KEY > \${HOME}/.config/api_keys\" \n \n"
+			printf \
+			"replace \"YOUR_API_KEY\" with your api key \n \n"
+			printf \
+			"(or you can manually add it to line 18 of this script) \n"
+			exit
+		fi
+	fi
+}
+
+unsplash() {
+	unsplashon="true"
+}
+
+colorlovers() {
+	colorloverson="true"
+}
+
+bgcolor() {
+	background="-b $1"
+}
+
+lightmodeon() {
+	lightmode="-l"
+}
+
+setwallpaperonly() {
+	wallpaperonly="true"
+}
+
+notifyon() {
+	notifications="true"
+}
+
+searchterm() {
+	keyword="$1"
+	searchon="true"
+}
+
+# this is where we read apis
+# as well as set the wallpaper 
+# or `wal` palette
+setwal() {
+	# if no arguments are given then run `unsplash` and `colorlovers`
+	if [ -z $unsplashon ] && [ -z $colorloverson ]
+	then
+		unsplashon="true"
+		colorloverson="true"
+	fi
+	# grab a random number to select from top results
+	entry="$((RANDOM%20))"
+	# do colorlovers stuff all here
+	# it performs the same regardless of if search is on or not
+	if [[ $colorloverson ]] ; then
+			# grab json for colorlovers
+			colorloversurl="http://www.colourlovers.com/api/palettes/top&format=json&numResults=20&keywords=$keyword"
+			colorloversjson=$(curl -s "$colorloversurl")
+			colorloversimage=$(echo "$colorloversjson" | jq ".[$entry] | .imageUrl" | tr -d '"')
+			colorloverstitle=$(echo "$colorloversjson" | jq ".[$entry] | .title" | tr -d '"')
+			# make palette more dynamic by adding a gradient to `wal` source image
+			convert "$colorloversimage" "$colorloversbadge"
+			convert -size 228x161 gradient: /tmp/gradient.png
+			composite /tmp/gradient.png -compose Soft_light "$colorloversbadge" "$colorloverswal"
+			# set `wal` with no wallpaper
+			rm -rf "${HOME}"/.cache/wal/schemes/_tmp*
+			wal -i "$colorloverswal" -n $background $lightmode 
+	fi
+	# do all unsplash stuff here
+	if [[ $unsplashon ]] ; then
+		# no need to use `wal` if we're getting the palette from colorlovers
+		if [[ $colorloverson ]]
+		then
+			wallpaperonly="true"
+		fi
+		# grab json for search or featured
+		if [[ $searchon ]] ; then
+			unsplashurl="https://api.unsplash.com/search/photos?client_id=$unsplashapi&query=$keyword&per_page=20"
+			searchjson=$(curl -s "$unsplashurl")
+			image="$(echo "$searchjson" | \
+				jq "{results} | .[] | .[$entry] | {urls} | .[] | {raw} | .[]" | tr -d '"')&w=1400&dpi=2"
+			username="$(echo "$searchjson" | \
+				jq ".results | .[$entry] .user .name" | tr -d '"')"
+			userscreenname="$(echo "$searchjson" | \
+				jq ".results | .[$entry] .user .username" | tr -d '"')"
+			userurl="$(echo "$searchjson" | \
+				jq ".results | .[$entry] .user .links .self" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
+			photourl="$(echo "$searchjson" | \
+				jq ".results | .[$entry] .links .html" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
+		else
+			unsplashurl="https://api.unsplash.com/photos?client_id=$unsplashapi&featured&per_page=20"
+			featuredjson=$(curl -s "$unsplashurl")
+			image="$(echo "$featuredjson" | \
+				jq ".[$entry] | .urls | .full" | tr -d '"')"
+			username="$(echo "$featuredjson" | \
+				jq ".[$entry] .user .name" | tr -d '"')"
+			userscreenname="$(echo "$featuredjson" | \
+				jq ".[$entry] .user .username" | tr -d '"')"
+			userurl="$(echo "$featuredjson" | \
+				jq ".[$entry] .user .links .self" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
+			photourl="$(echo "$featuredjson" | \
+				jq ".[$entry] .links .html" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
+		fi
+		# skip setting `wal` palette (maybe use colorlovers' palette instead)
+		if [[ -z $wallpaperonly ]]
+		then
+			rm "${HOME}"/.cache/wal/schemes/_tmp*
+			convert "$image" "$wallpaper" &&
+			wal -i "$wallpaper" -o wal-set -q $nowallpaper $background $lightmode
+		else
+			convert "$image" "$wallpaper" &&
+			wallpaper "$wallpaper"	
+		fi
+	fi
+}
+
+notify() {
+	if [[ $notifications ]]; then
+		notify-send -i "$wallpaper" -m "photo by $username ($userscreenname)"
+	fi
+}
+
+credits() {
+	if [[ $unsplashon ]]
+	then
+		echo "wallpaper set as:"
+		echo "$photourl"
+		echo "photo by $username ($userscreenname)"
+		echo "$userurl"
+		echo "photo supplied by https://unsplash.com/"
+	fi
+	if [[ $colorloverson ]]
+	then
+		echo ""
+		echo ""
+	fi
+}
+
+save() {
+	savedir="$2"
+	savename="$1"
+	savefile="${savedir:-${HOME}/Downloads}/${savename:-wallpaper}"
+	if [[ -e "$savefile.png" ]]
+	then
+		i=0
+		savefile="${savedir:-${HOME}/Downloads}/${savename:-wallpaper}$((++i))"
+	fi
+	cp "$wallpaper" "$savefile.png" &&
+	echo "$savefile.png saved" &
+	notify-send -m "saved $savefile.png" -i "$savefile.png"
+	exit
+}
+
+variables() {
+	echo "image url: $image"
+	echo "unsplash api key: $unsplashapi"
+	echo "unsplash api url: $unsplashurl"
+	echo "search keyword: $keyword"
+	echo "entry number: $entry"
+	echo "photo page: $photourl"
+	echo "author: $username ( $userscreenname )"
+	echo "author's profile: $userurl"
+	echo "photo supplied by https://unsplash.com/"
+	echo "colorlovers api url: $colorloversurl"
+	echo "colorlovers image url: $colorloversimage"
+	echo "colorlovers title: $colorloverstitle"
+	exit
+}
+
+help() {
+	printf "\navailable flags: \n"
+	printf "unsplash on: -u \n"
+	printf "colorlovers on: -c \n"
+	printf "search: -s (keyword) \n"
+	printf "background -b (hex value) \n"
+	printf "light mode: -l \n"
+	printf \
+	"only set wallpaper (no system palette): -w \n" 
+	printf "notify when done: -n \n"
+	printf "echo api url, image url, search keyword, random entry number \n"
+	exit
+}
+
+flags() {
+	while getopts ucfb:lws:dnxh opt; do
+		case $opt in
+			u)
+			unsplash
+			;;
+			c)
+			colorlovers
+			;;
+			b)
+			bgcolor "$OPTARG"
+			;;
+			l)
+			lightmodeon
+			;;
+			w)
+			setwallpaperonly
+			;;
+			s)
+			searchterm "$OPTARG"
+			;;
+			n)
+			notifyon
+			;;
+			d)
+			save "$OPTARG"
+			;;
+			x)
+			variables
+			;;
+			h)
+			help
+			;;
+			*)
+			;;
+		esac
+	done
+}
+
+if [ "$#" -ne 0 ]; then
+	flags "$@"
+	getapi
+	# if argument is not a flag then treat as search term
+	if [ ${#1} -gt 2 ]; then
+		searchterm $1
+	fi
+	getapi
+	setwal
+	notify
+	credits
+else
+	getapi
+	setwal
+	notify
+	credits
+fi
+
+################
+#    TO DO     #
+################
+
+# save function only appends "1" and then overwrites
+# add credits for colorlovers (jq)
