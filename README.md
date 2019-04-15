@@ -28,7 +28,7 @@ echo "unsplashapi=YOUR_API_KEY" > "${HOME/.config/api_keys"
 
 ## Usage
 
-`new-roses`, by default, applies a wallpaper from Unsplash.com and a color palette from Colorlovers.com with the search term "spring."  If no flags are provided then the argument will be treated as a search term.
+By default, a wallpaper from Unsplash and a color palette from Colorlovers are applied.  If no flags are provided, then any argument will be treated as a search term.  And if no flags or arguments are provided, then the search term "spring" and the background color "222222" will be used.  To use only Colorlovers or Unsplash use the -c or -u flags.
 
 ```
 Usage: new-roses [OPTION] [SEARCHTERM]
@@ -37,6 +37,7 @@ Usage: new-roses [OPTION] [SEARCHTERM]
        
 Example: new-roses spring
          new-roses -b 222222 coffee
+	 new-roses -wnq 
 	 
 Optional arguments:
   -u                      Apply wallpaper and color palette from Unsplash.com
