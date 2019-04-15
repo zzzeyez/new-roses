@@ -26,8 +26,6 @@ colorloverswal="$cache/wal.png"
 unsplashartistfile="$cache/wallpaperartist"
 lightmode=""
 background=""
-walcache="${cache////_}"
-walcache="${HOME}/.cache/wal/schemes/${walcache//./_}"
 
 # check for API key and cache dir
 setup() {
@@ -50,10 +48,10 @@ setup() {
 		mkdir "$cache"
 		touch "$unsplashartistfile"
 	fi
-	if [[ -e "$walcache"* ]]
-	then
+	# delete `wal` cache
+	walcache="${cache////_}"
+	walcache="${HOME}/.cache/wal/schemes/${walcache//./_}"
 	rm -rf "$walcache"*
-	fi
 }
 
 defaults() {
