@@ -3,7 +3,7 @@
 
 Grab system-appearance/wallpaper selections from online sources.
 
-## install
+## Install
 
 Download and place `new-roses` in your $PATH:
 
@@ -19,6 +19,13 @@ brew install jq imagemagick
 pip3 install pywal
 ```
 
+In order to fetch wallpaper images, you will need to obtain an Unsplash.com API key at https://unsplash.com/developers and then allow `new-roses` to use it:
+
+```
+touch ${HOME}/.config/api_keys
+echo "unsplashapi=YOUR_API_KEY" > "${HOME/.config/api_keys"
+```
+
 ## Usage
 
 `new-roses`, by default, applies a wallpaper from Unsplash.com and a color palette from Colorlovers.com with the search term "spring."  If no flags are provided then the argument will be treated as a search term.
@@ -32,7 +39,7 @@ Example: new-roses spring
          new-roses -b 222222 coffee
 	 
 Optional arguments:
-  -u                      Apply wallpaper from Unsplash.com
+  -u                      Apply wallpaper and color palette from Unsplash.com
   -c                      Apply color palette from Colorlovers.com
   -b 222222               Load colors directly from a colorscheme file.
   -l                      Use light color palette.
