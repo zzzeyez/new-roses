@@ -74,7 +74,6 @@ setwal() {
 	# delete `wal` cache
 	walcache="${cache////_}"
 	walcache="${HOME}/.cache/wal/schemes/${walcache//./_}"
-	echo "$walcache"
 	rm -rf "$walcache"*
 	# do colorlovers stuff all here
 	# it performs the same regardless of if search is on or not
@@ -303,6 +302,7 @@ flags() {
 	then
 		keyword="$1"
 		searchon="true"
+		background="-b $defaultbgcolor"
 	fi
 }
 
@@ -327,4 +327,3 @@ fi
 ################
 
 # stop using `wallpaper` to set wallpaper
-# fix save notifications
