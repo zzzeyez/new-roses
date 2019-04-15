@@ -48,10 +48,6 @@ setup() {
 		mkdir "$cache"
 		touch "$unsplashartistfile"
 	fi
-	# delete `wal` cache
-	walcache="${cache////_}"
-	walcache="${HOME}/.cache/wal/schemes/${walcache//./_}"
-	rm -rf "$walcache"*
 }
 
 defaults() {
@@ -116,6 +112,14 @@ getapi() {
 
 # set wallpaper and/or color palette
 setwal() {
+	# delete `wal` cache
+	if [[ -z $wallpaperonly ]]
+	then
+		walcache="${cache////_}"
+		walcache="${HOME}/.cache/wal/schemes/${walcache//./_}"
+		rm -rf "$walcache"*
+		echo "$walcache"
+	fi
 	if [[ $colorloverson ]]
 	then
 		if [[ -z $wallpaperonly ]]
