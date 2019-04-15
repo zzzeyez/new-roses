@@ -75,10 +75,6 @@ getapi() {
 	fi
 	if [[ $unsplashon ]]
 	then
-		if [[ $colorloverson ]]
-		then
-			wallpaperonly="true"
-		fi
 		if [[ $searchon ]]
 		then
 			unsplashurl="https://api.unsplash.com/search/photos?client_id=$unsplashapi&query=$keyword&per_page=20"
@@ -112,14 +108,6 @@ getapi() {
 
 # set wallpaper and/or color palette
 setwal() {
-	# delete `wal` cache
-	if [[ -z $wallpaperonly ]]
-	then
-		walcache="${cache////_}"
-		walcache="${HOME}/.cache/wal/schemes/${walcache//./_}"
-		rm -rf "$walcache"*
-		echo "$walcache"
-	fi
 	if [[ $colorloverson ]]
 	then
 		if [[ -z $wallpaperonly ]]
@@ -128,19 +116,27 @@ setwal() {
 			convert "$colorloversimage" "$colorloversbadge"
 			convert -size 228x161 gradient: /tmp/gradient.png
 			composite /tmp/gradient.png -compose Soft_light "$colorloversbadge" "$colorloverswal"
+			# delete `wal` cache
+			walcache="${cache////_}"
+			walcache="${HOME}/.cache/wal/schemes/${walcache//./_}"
+			rm -rf "$walcache"*
 			# apply `wal`
 			wal -i "$colorloverswal" -q -n $background $lightmode 
 		fi
 	fi
 	if [[ $unsplashon ]]
 	then
-		if [[ -z $wallpaperonly ]]
+		if [[ $wallpaperonly ]] || [[ $colorloverson ]]
 		then
 			convert "$image" "$wallpaper" &&
-			wal -i "$wallpaper" -o wal-set -q $background $lightmode
+			wallpaper "$wallpaper"
 		else
 			convert "$image" "$wallpaper" &&
-			wallpaper "$wallpaper"	
+			# delete `wal` cache
+			walcache="${cache////_}"
+			walcache="${HOME}/.cache/wal/schemes/${walcache//./_}"
+			rm -rf "$walcache"*
+			wal -i "$wallpaper" -o wal-set -q $background $lightmode
 		fi
 	fi
 }
@@ -220,13 +216,13 @@ credits() {
 
 save() {
 	savedir="$1"
-	savename=$(cat $unsplashartistfile)
+	savename=$(cat "$unsplashartistfile")
 	savefile="$savedir/$savename"
 	if [[ -e $savefile.png ]] ; then
 	    i=0
 	    while [[ -e $savefile-$i.png ]] 
 		do
-	        let i++
+	        (( i++ ))
 	    done
 	    savefile=$savefile-$i
 	fi
@@ -257,7 +253,7 @@ Optional arguments:
 			  it will be treated as a search term)
   -d '/path/to/dir/'	  Save wallpaper to directory.
   -q                      Quiet mode, don't print anything.
-  -n			  Notify when finished (requires `notify-send`).
+  -n			  Notify when finished (requires notify-send).
   -x                      Print all variables (test yr API connnection).
   -h			  Display this help page and exit.
 "
