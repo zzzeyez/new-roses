@@ -2,7 +2,9 @@
 #
 # author: daniel neemann (@zzzeyez)
 #
-# grabs image from Unsplash and sets as wallpaper
+# sets wallpaper or `wal` colorscheme
+# from unsplash.com images
+# or colorlovers.com palettes
 #
 # requires `wal`, `imagemagick` and `jq`
 
