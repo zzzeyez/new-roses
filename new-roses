@@ -37,19 +37,15 @@ setup() {
 		then
 		if [[ -z $unsplashapi ]]
 		then
-			printf \
-			"\nREQUIREMENT: GET YOUR OWN API KEY AT: \n \n"
-			printf "https://unsplash.com/developers \n \n"
-			printf "and then use it like so: \n \n"
-			printf \
-			"touch \"\${HOME}/.config/api_keys\" && "
-			printf \
-			"echo \"unsplashapi=YOUR_API_KEY > \${HOME}/.config/api_keys\" \n \n"
-			printf \
-			"replace \"YOUR_API_KEY\" with your api key \n \n"
-			printf \
-			"(or you can manually add it to line 18 of this script) \n"
-			exit
+			quietmodeon="true"
+			printf "%s" "\
+REQUIREMENT: GET YOUR OWN API KEY AT:
+https://unsplash.com/developers
+
+And then use it like so:
+
+touch \"\${HOME}/.config/api_keys\"
+echo \"unsplashapi=YOUR_API_KEY\" > \"${HOME}/.config/api_keys\""
 		fi
 	fi	
 	if [ ! -d $cache ]; then
