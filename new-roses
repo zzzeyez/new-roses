@@ -29,6 +29,12 @@ background=""
 
 # check for API key and cache dir
 setup() {
+	# if no arguments are given then run `unsplash` and `colorlovers`
+	if [ -z "$unsplashon" ] && [ -z "$colorloverson" ] && [ -z "$savefile" ]
+	then
+		unsplashon="true"
+		colorloverson="true"
+	fi
 	if [[ $unsplashon ]]
 		then
 		if [[ -z $unsplashapi ]]
@@ -40,20 +46,7 @@ setup() {
 	if [ ! -d $cache ]
 	then
 		mkdir "$cache"
-		touch "$wallpaper"
-		touch "$colorloversbadge"
-		touch "$colorloverswal"
 		touch "$unsplashartistfile"
-	fi
-}
-
-# fetch json and set wal
-setwal() {
-	# if no arguments are given then run `unsplash` and `colorlovers`
-	if [ -z "$unsplashon" ] && [ -z "$colorloverson" ] && [ -z "$savefile" ]
-	then
-		unsplashon="true"
-		colorloverson="true"
 	fi
 	# grab a random number to select from top results
 	entry="$((RANDOM%20))"
@@ -61,8 +54,11 @@ setwal() {
 	walcache="${cache////_}"
 	walcache="${HOME}/.cache/wal/schemes/${walcache//./_}"
 	rm -rf "$walcache"*
-	# do colorlovers stuff all here
-	# it performs the same regardless of if search is on or not
+}
+
+# fetch json data
+getapi() {
+	# this performs the same regardless of if search is on or not
 	if [[ $colorloverson ]]
 	then
 		if [[ -z $wallpaperonly ]]
@@ -73,15 +69,8 @@ setwal() {
 			colorloversimage=$(echo "$colorloversjson" | jq ".[$entry] | .imageUrl" | tr -d '"')	
 			colorloversusername=$(echo "$colorloversjson" | jq ".[$entry] | .userName" | tr -d '"')
 			colorloverstitle=$(echo "$colorloversjson" | jq ".[$entry] | .title" | tr -d '"')
-			# make palette more dynamic by adding a gradient to `wal` source image
-			convert "$colorloversimage" "$colorloversbadge"
-			convert -size 228x161 gradient: /tmp/gradient.png
-			composite /tmp/gradient.png -compose Soft_light "$colorloversbadge" "$colorloverswal"
-			# apply `wal`
-			wal -i "$colorloverswal" -q -n $background $lightmode 
 		fi
 	fi
-	# do all unsplash stuff here
 	if [[ $unsplashon ]]
 	then
 		# no need to use `wal` if we're getting the palette from colorlovers
@@ -118,7 +107,25 @@ setwal() {
 			photourl="$(echo "$featuredjson" | \
 				jq ".[$entry] .links .html" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
 		fi
-		# skip setting `wal` palette (maybe use colorlovers' palette instead)
+	fi
+}
+
+# set wallpaper and/or color palette
+setwal() {
+	if [[ $colorloverson ]]
+	then
+		if [[ -z $wallpaperonly ]]
+		then
+			# make palette more dynamic by adding a gradient to `wal` source image
+			convert "$colorloversimage" "$colorloversbadge"
+			convert -size 228x161 gradient: /tmp/gradient.png
+			composite /tmp/gradient.png -compose Soft_light "$colorloversbadge" "$colorloverswal"
+			# apply `wal`
+			wal -i "$colorloverswal" -q -n $background $lightmode 
+		fi
+	fi
+	if [[ $unsplashon ]]
+	then
 		if [[ -z $wallpaperonly ]]
 		then
 			convert "$image" "$wallpaper" &&
@@ -312,11 +319,13 @@ flags() {
 if [ "$#" -ne 0 ]; then
 	flags "$@"
 	setup
+	getapi
 	setwal
 	notify
 	credits
 else
 	setup
+	getapi
 	keyword="$defaultkeyword"
 	searchon="true"
 	background="-b $defaultbgcolor"
