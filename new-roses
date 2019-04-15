@@ -282,15 +282,15 @@ flags() {
 			keyword="$OPTARG"
 			searchon="true"
 			;;
+			d)
+			save "$OPTARG"
+			exit
+			;;
 			q)
 			quietmodeon="true"
 			;;
 			n)
 			notifyon="true"
-			;;
-			d)
-			save "$OPTARG"
-			exit
 			;;
 			x)
 			variableson="true"
