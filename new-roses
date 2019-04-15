@@ -246,7 +246,7 @@ Example: new-roses spring
          new-roses -b 222222 coffee
 	 
 Optional arguments:
-  -u                      Apply wallpaper from Unsplash.com
+  -u                      Apply wallpaper and color palette from Unsplash.com
   -c                      Apply color palette from Colorlovers.com
   -b 222222               Load colors directly from a colorscheme file.
   -l                      Use light color palette.
