@@ -43,7 +43,7 @@ setup() {
 			apimissing="true"
 		fi
 	fi	
-	if [ ! -d $cache ]
+	if [ ! -d "$cache" ]
 	then
 		mkdir "$cache"
 		touch "$unsplashartistfile"
@@ -178,42 +178,42 @@ credits() {
 		CYN="\e[36m" && CYNBAR="$CYN$BAR$RST"
 		if [[ $unsplashon ]]
 		then
-			printf "$REDBAR " && echo "wallpaper set as:"
-			printf "$GRNBAR " && echo "$photourl"
-			printf "$YLWBAR " && echo "photo by $username ($userscreenname)"
-			printf "$BLUBAR " && echo "$userurl"
-			printf "$PURBAR " && echo "photo supplied by https://unsplash.com/"
+			printf "%b" "$REDBAR wallpaper set as:"
+			printf "%b" "$GRNBAR $photourl"
+			printf "%b" "$YLWBAR photo by $username ($userscreenname)"
+			printf "%b" "$BLUBAR $userurl"
+			printf "%b" "$PURBAR photo supplied by https://unsplash.com/"
 		fi
 		if [[ $colorloverson ]]
 		then
-			printf "$REDBAR " && echo "color palette set as:"
-			printf "$GRNBAR " && echo "$colorloverstitle by $colorloversusername"
-			printf "$YLWBAR " && echo "courtesy of colorlovers.com"
+			printf "%b" "$REDBAR color palette set as:"
+			printf "%b" "$GRNBAR $colorloverstitle by $colorloversusername"
+			printf "%b" "$YLWBAR courtesy of colorlovers.com"
 		fi
 		if [[ $variableson ]]
 		then
-			printf "$REDBAR" && echo "image url: $image"
-			printf "$GRNBAR" && echo "unsplash api key: $unsplashapi"
-			printf "$YLWBAR" && echo "unsplash api url: $unsplashurl"
-			printf "$BLUBAR" && echo "search keyword: $keyword"
-			printf "$PURBAR" && echo "entry number: $entry"
-			printf "$CYNBAR" && echo "photo page: $photourl"
-			printf "$PURBAR" && echo "author: $username ( $userscreenname )"
-			printf "$BLUBAR" && echo "author's profile: $userurl"
-			printf "$YLWBAR" && echo "photo supplied by https://unsplash.com/"
-			printf "$GRNBAR" && echo "colorlovers api url: $colorloversurl"
-			printf "$REDBAR" && echo "colorlovers image url: $colorloversimage"
-			printf "$GRNBAR" && echo "colorlovers title: $colorloverstitle"
+			printf "%b" "$REDBAR image url: $image"
+			printf "%b" "$GRNBAR unsplash api key: $unsplashapi"
+			printf "%b" "$YLWBAR unsplash api url: $unsplashurl"
+			printf "%b" "$BLUBAR search keyword: $keyword"
+			printf "%b" "$PURBAR entry number: $entry"
+			printf "%b" "$CYNBAR photo page: $photourl"
+			printf "%b" "$PURBAR author: $username ( $userscreenname )"
+			printf "%b" "$BLUBAR author's profile: $userurl"
+			printf "%b" "$YLWBAR photo supplied by https://unsplash.com/"
+			printf "%b" "$GRNBAR colorlovers api url: $colorloversurl"
+			printf "%b" "$REDBAR colorlovers image url: $colorloversimage"
+			printf "%b" "$GRNBAR colorlovers title: $colorloverstitle"
 		fi
 		if [[ $apimissing ]]
 		then
-			printf "$REDBAR" && echo "REQUIREMENT: GET YOUR OWN API KEY AT:"
-			printf "$GRNBAR" && echo "https://unsplash.com/developers"
-			printf "$YLWBAR" && echo
-			printf "$BLUBAR" && echo "and then use it like so:"
-			printf "$PURBAR" && echo
-			printf "$CYNBAR" && echo 'touch "${HOME}/.config/api_keys"'
-			printf "$PURBAR" && echo 'echo "unsplashapi=YOUR_API_KEY" > "${HOME}/.config/api_keys"'
+			printf "%b" "$REDBAR REQUIREMENT: GET YOUR OWN API KEY AT:"
+			printf "%b" "$GRNBAR https://unsplash.com/developers"
+			printf "%b" "$YLWBAR"
+			printf "%b" "$BLUBAR and then use it like so:"
+			printf "%b" "$PURBAR"
+			printf "%b" "$CYNBAR \touch \"\${HOME}/.config/api_keys\""
+			printf "%b" "$PURBAR echo \"unsplashapi=YOUR_API_KEY\" > \"\${HOME}/.config/api_keys\""
 		fi
 	fi
 }
