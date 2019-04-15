@@ -26,6 +26,8 @@ colorloverswal="$cache/wal.png"
 unsplashartistfile="$cache/wallpaperartist"
 lightmode=""
 background=""
+walcache="${cache////_}"
+walcache="${HOME}/.cache/wal/schemes/${walcache//./_}"
 
 # check for API key and cache dir
 setup() {
@@ -48,16 +50,22 @@ setup() {
 		mkdir "$cache"
 		touch "$unsplashartistfile"
 	fi
-	# grab a random number to select from top results
-	entry="$((RANDOM%20))"
-	# delete `wal` cache
-	walcache="${cache////_}"
-	walcache="${HOME}/.cache/wal/schemes/${walcache//./_}"
+	if [[ -e "$walcache"* ]]
+	then
 	rm -rf "$walcache"*
+	fi
+}
+
+defaults() {
+	keyword="$1"
+	searchon="true"
+	background="-b $defaultbgcolor"
 }
 
 # fetch json data
 getapi() {
+	# grab a random number to select from top results
+	entry="$((RANDOM%20))"
 	# this performs the same regardless of if search is on or not
 	if [[ $colorloverson ]]
 	then
@@ -84,28 +92,28 @@ getapi() {
 			unsplashurl="https://api.unsplash.com/search/photos?client_id=$unsplashapi&query=$keyword&per_page=20"
 			searchjson=$(curl -s "$unsplashurl")
 			image="$(echo "$searchjson" | \
-				jq "{results} | .[] | .[$entry] | {urls} | .[] | {raw} | .[]" | tr -d '"')&w=1400&dpi=2"
+			jq "{results} | .[] | .[$entry] | {urls} | .[] | {raw} | .[]" | tr -d '"')&w=1400&dpi=2"
 			username="$(echo "$searchjson" | \
-				jq ".results | .[$entry] .user .name" | tr -d '"')"
+			jq ".results | .[$entry] .user .name" | tr -d '"')"
 			userscreenname="$(echo "$searchjson" | \
-				jq ".results | .[$entry] .user .username" | tr -d '"')"
+			jq ".results | .[$entry] .user .username" | tr -d '"')"
 			userurl="$(echo "$searchjson" | \
-				jq ".results | .[$entry] .user .links .self" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
+			jq ".results | .[$entry] .user .links .self" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
 			photourl="$(echo "$searchjson" | \
-				jq ".results | .[$entry] .links .html" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
+			jq ".results | .[$entry] .links .html" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
 		else
 			unsplashurl="https://api.unsplash.com/photos?client_id=$unsplashapi&featured&per_page=20"
 			featuredjson=$(curl -s "$unsplashurl")
 			image="$(echo "$featuredjson" | \
-				jq ".[$entry] | .urls | .full" | tr -d '"')"
+			jq ".[$entry] | .urls | .full" | tr -d '"')"
 			username="$(echo "$featuredjson" | \
-				jq ".[$entry] .user .name" | tr -d '"')"
+			jq ".[$entry] .user .name" | tr -d '"')"
 			userscreenname="$(echo "$featuredjson" | \
-				jq ".[$entry] .user .username" | tr -d '"')"
+			jq ".[$entry] .user .username" | tr -d '"')"
 			userurl="$(echo "$featuredjson" | \
-				jq ".[$entry] .user .links .self" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
+			jq ".[$entry] .user .links .self" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
 			photourl="$(echo "$featuredjson" | \
-				jq ".[$entry] .links .html" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
+			jq ".[$entry] .links .html" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
 		fi
 	fi
 }
@@ -160,23 +168,14 @@ notify() {
 credits() {
 	if [[ -z $quietmodeon ]] 
 	then
-		# color escapes
-		BLK="\e[30m"
-		RED="\e[31m"
-		GRN="\e[32m"
-		YLW="\e[33m"
-		BLU="\e[34m"
-		PUR="\e[35m"
-		CYN="\e[36m"
-		RST="\e[0m"
 		# build the color bars
-		BAR="███"
-		REDBAR="$RED$BAR$RST"
-		GRNBAR="$GRN$BAR$RST"
-		YLWBAR="$YLW$BAR$RST"
-		BLUBAR="$BLU$BAR$RST"
-		PURBAR="$PUR$BAR$RST" 
-		CYNBAR="$CYN$BAR$RST"
+		BAR="███" && RST="\e[0m"
+		RED="\e[31m" && REDBAR="$RED$BAR$RST"
+		GRN="\e[32m" && GRNBAR="$GRN$BAR$RST"
+		YLW="\e[33m" && YLWBAR="$YLW$BAR$RST"
+		BLU="\e[34m" && BLUBAR="$BLU$BAR$RST"
+		PUR="\e[35m" && PURBAR="$PUR$BAR$RST" 
+		CYN="\e[36m" && CYNBAR="$CYN$BAR$RST"
 		if [[ $unsplashon ]]
 		then
 			printf "$REDBAR " && echo "wallpaper set as:"
@@ -193,18 +192,18 @@ credits() {
 		fi
 		if [[ $variableson ]]
 		then
-			echo "image url: $image"
-			echo "unsplash api key: $unsplashapi"
-			echo "unsplash api url: $unsplashurl"
-			echo "search keyword: $keyword"
-			echo "entry number: $entry"
-			echo "photo page: $photourl"
-			echo "author: $username ( $userscreenname )"
-			echo "author's profile: $userurl"
-			echo "photo supplied by https://unsplash.com/"
-			echo "colorlovers api url: $colorloversurl"
-			echo "colorlovers image url: $colorloversimage"
-			echo "colorlovers title: $colorloverstitle"
+			printf "$REDBAR" && echo "image url: $image"
+			printf "$GRNBAR" && echo "unsplash api key: $unsplashapi"
+			printf "$YLWBAR" && echo "unsplash api url: $unsplashurl"
+			printf "$BLUBAR" && echo "search keyword: $keyword"
+			printf "$PURBAR" && echo "entry number: $entry"
+			printf "$CYNBAR" && echo "photo page: $photourl"
+			printf "$PURBAR" && echo "author: $username ( $userscreenname )"
+			printf "$BLUBAR" && echo "author's profile: $userurl"
+			printf "$YLWBAR" && echo "photo supplied by https://unsplash.com/"
+			printf "$GRNBAR" && echo "colorlovers api url: $colorloversurl"
+			printf "$REDBAR" && echo "colorlovers image url: $colorloversimage"
+			printf "$GRNBAR" && echo "colorlovers title: $colorloverstitle"
 		fi
 		if [[ $apimissing ]]
 		then
@@ -307,12 +306,11 @@ flags() {
 			;;
 		esac
 	done
+	# if no flags are provided do `new-roses [searchterm] [bgcolor]`
 	shift "$((OPTIND-1))" 
 	if [ "$1" != "-*" ] && [ "$1" ] ;
 	then
-		keyword="$1"
-		searchon="true"
-		background="-b $defaultbgcolor"
+		defaults "$1"
 	fi
 }
 
@@ -326,9 +324,7 @@ if [ "$#" -ne 0 ]; then
 else
 	setup
 	getapi
-	keyword="$defaultkeyword"
-	searchon="true"
-	background="-b $defaultbgcolor"
+	defaults "$defaultkeyword"
 	setwal
 	notify
 	credits
