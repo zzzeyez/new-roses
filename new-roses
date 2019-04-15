@@ -243,6 +243,7 @@ Usage: new-roses [OPTION] [SEARCHTERM]
        
 Example: new-roses spring
          new-roses -b 222222 coffee
+	 new-roses -wnq
 	 
 Optional arguments:
   -u                      Apply wallpaper and color palette from Unsplash.com
