@@ -205,11 +205,13 @@ credits() {
 		fi
 		if [[ $apimissing ]]
 		then
-			printf "REQUIREMENT: GET YOUR OWN API KEY AT: \n"
-			printf "https://unsplash.com/developers \n \n"
-			printf "and then use it like so: \n \n"
-			printf "touch \"\${HOME}/.config/api_keys\" \n"
-			printf "echo \"unsplashapi=YOUR_API_KEY\" > \"${HOME}/.config/api_keys\""
+			printf "$REDBAR" && echo "REQUIREMENT: GET YOUR OWN API KEY AT:"
+			printf "$GRNBAR" && echo "https://unsplash.com/developers"
+			printf "$YLWBAR" && echo
+			printf "$BLUBAR" && echo "and then use it like so:"
+			printf "$PURBAR" && echo
+			printf "$CYNBAR" && echo 'touch "${HOME}/.config/api_keys"'
+			printf "$PURBAR" && echo 'echo "unsplashapi=YOUR_API_KEY" > "${HOME}/.config/api_keys"'
 		fi
 	fi
 }
