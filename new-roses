@@ -9,46 +9,36 @@
 # requires `wal`, `imagemagick` and `jq`
 
 # requires API key from https://unsplash.com/developers
-# add the API key to the end of line 19,
-# uncomment line 19 and then comment line 13
 source "${HOME}/.config/api_keys"
+#unsplashapi="YOUR_KEY_HERE"
+
+# where temporary files will be stored
+cache="${HOME}/.cache/new-roses"
 
 # default search keyword and background color
 # (this is ran if no arguments are provided)
 defaultkeyword="spring"
 defaultbgcolor="222222"
 
-# where temporary files will be stored
-cache="${HOME}/.cache/new-roses"
 wallpaper="$cache/wallpaper.png"
 colorloversbadge="$cache/colorloversbadge.png"
 colorloverswal="$cache/wal.png"
 unsplashartistfile="$cache/wallpaperartist"
-
-# `wal` uses these as arguments (-l, -b)
 lightmode=""
 background=""
 
-# this is where we grab API key and check
-# if the cache directory exists
+# check for API key and cache dir
 setup() {
-#	unsplashapi=
 	if [[ $unsplashon ]]
 		then
 		if [[ -z $unsplashapi ]]
 		then
-			quietmodeon="true"
-			printf "%s" "\
-REQUIREMENT: GET YOUR OWN API KEY AT:
-https://unsplash.com/developers
-
-And then use it like so:
-
-touch \"\${HOME}/.config/api_keys\"
-echo \"unsplashapi=YOUR_API_KEY\" > \"${HOME}/.config/api_keys\""
+			unset unsplashon
+			apimissing="true"
 		fi
 	fi	
-	if [ ! -d $cache ]; then
+	if [ ! -d $cache ]
+	then
 		mkdir "$cache"
 		touch "$wallpaper"
 		touch "$colorloversbadge"
@@ -57,9 +47,7 @@ echo \"unsplashapi=YOUR_API_KEY\" > \"${HOME}/.config/api_keys\""
 	fi
 }
 
-# this is where we read apis
-# as well as set the wallpaper 
-# or `wal` palette
+# fetch json and set wal
 setwal() {
 	# if no arguments are given then run `unsplash` and `colorlovers`
 	if [ -z "$unsplashon" ] && [ -z "$colorloverson" ] && [ -z "$savefile" ]
@@ -94,7 +82,8 @@ setwal() {
 		fi
 	fi
 	# do all unsplash stuff here
-	if [[ $unsplashon ]] ; then
+	if [[ $unsplashon ]]
+	then
 		# no need to use `wal` if we're getting the palette from colorlovers
 		if [[ $colorloverson ]]
 		then
@@ -209,6 +198,14 @@ credits() {
 			echo "colorlovers api url: $colorloversurl"
 			echo "colorlovers image url: $colorloversimage"
 			echo "colorlovers title: $colorloverstitle"
+		fi
+		if [[ $apimissing ]]
+		then
+			printf "REQUIREMENT: GET YOUR OWN API KEY AT: \n"
+			printf "https://unsplash.com/developers \n \n"
+			printf "and then use it like so: \n \n"
+			printf "touch \"\${HOME}/.config/api_keys\" \n"
+			printf "echo \"unsplashapi=YOUR_API_KEY\" > \"${HOME}/.config/api_keys\""
 		fi
 	fi
 }
