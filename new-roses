@@ -237,20 +237,28 @@ save() {
 	fi
 }
 
-help() {
-	printf "\navailable flags: \n"
-	printf "search: -s (keyword) \n"
-	printf "(you can also search with: `new-roses (keyword)`)"
-	printf "unsplash on: -u \n"
-	printf "colorlovers on: -c \n"
-	printf "save current wallpaper: -d (directory)"
-	printf "(so like: `new-roses -d ~/pictures/wallpapers`)"
-	printf "background -b (hex value) \n"
-	printf "light mode: -l \n"
-	printf "only set wallpaper (no system palette): -w \n" 
-	printf "notify when done: -n \n"
-	printf "quiet mode: -q \n"
-	printf "verify API connection: -x"
+help() { printf "%s" "\
+Usage: new-roses [OPTION] [SEARCHTERM]
+       [-u] [-c] [-b 'color'] [-l] [-w] [-s 'searchterm']
+       [-d '/download/dir'] [-q] [-n] [-x] [-h]
+       
+Example: new-roses spring
+         new-roses -b 222222 coffee
+	 
+Optional arguments:
+  -u                      Apply wallpaper from Unsplash.com
+  -c                      Apply color palette from Colorlovers.com
+  -b 222222               Load colors directly from a colorscheme file.
+  -l                      Use light color palette.
+  -w			  Skip setting color palette.
+  -s 'searchterm'         Use search term (if an argument with no flags is provided
+			  it will be treated as a search term)
+  -d '/path/to/dir/'	  Save wallpaper to directory.
+  -q                      Quiet mode, don't print anything.
+  -n			  Notify when finished (requires `notify-send`).
+  -x                      Print all variables (test yr API connnection).
+  -h			  Display this help page and exit.
+"
 }
 
 flags() {
@@ -329,3 +337,4 @@ fi
 ################
 
 # stop using `wallpaper` to set wallpaper
+# (maybe just do `wal -ts`)
