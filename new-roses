@@ -37,7 +37,7 @@ setup() {
 	fi
 	if [[ $unsplashon ]]
 		then
-		if [[ -z $unsplashapi ]]
+		if [[ -z "$unsplashapi" ]]
 		then
 			unset unsplashon
 			apimissing="true"
@@ -47,6 +47,16 @@ setup() {
 	then
 		mkdir "$cache"
 		touch "$unsplashartistfile"
+	fi
+}
+
+# remove `wal` cache
+rmcache() {
+	if [[ -z $wallpaperonly ]]
+	then
+		walcache="${cache////_}"
+		walcache="${HOME}/.cache/wal/schemes/${walcache//./_}"
+		rm -rf "$walcache"*
 	fi
 }
 
@@ -116,10 +126,6 @@ setwal() {
 			convert "$colorloversimage" "$colorloversbadge"
 			convert -size 228x161 gradient: /tmp/gradient.png
 			composite /tmp/gradient.png -compose Soft_light "$colorloversbadge" "$colorloverswal"
-			# delete `wal` cache
-			walcache="${cache////_}"
-			walcache="${HOME}/.cache/wal/schemes/${walcache//./_}"
-			rm -rf "$walcache"*
 			# apply `wal`
 			wal -i "$colorloverswal" -q -n $background $lightmode 
 		fi
@@ -132,10 +138,6 @@ setwal() {
 			wallpaper "$wallpaper"
 		else
 			convert "$image" "$wallpaper" &&
-			# delete `wal` cache
-			walcache="${cache////_}"
-			walcache="${HOME}/.cache/wal/schemes/${walcache//./_}"
-			rm -rf "$walcache"*
 			wal -i "$wallpaper" -o wal-set -q $background $lightmode
 		fi
 	fi
@@ -317,6 +319,7 @@ if [ "$#" -ne 0 ]; then
 	flags "$@"
 	setup
 	getapi
+	rmcache
 	setwal
 	notify
 	credits
@@ -324,6 +327,7 @@ else
 	setup
 	getapi
 	defaults "$defaultkeyword"
+	rmcache
 	setwal
 	notify
 	credits
