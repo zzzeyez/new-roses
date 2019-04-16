@@ -10,10 +10,6 @@
 
 # you can change these if you want
 config="${HOME}/.config/new-roses"
-wallpaper="$cache/wallpaper.png"
-colorloversbadge="$cache/colorloversbadge.png"
-colorloverswal="$cache/colorloverswal.png"
-unsplashartistfile="$cache/wallpaperartist"
 
 # just don't change these
 lightmode=""
@@ -30,12 +26,19 @@ createconfig() {
 setup() {
 	# check for config
 	if [[ -e $config ]]
+	then
 		source "$config"
 	fi
 	# check for defaults
-	if [[ -z "$cache" ]] ; then ; cache="${HOME}/.cache/new-roses" ; fi
-	if [[ -z "$defaultkeyword" ]] ; then ; defaultkeyword="spring" ; fi
-	if [[ -z "$defaultbgcolor" ]] ; then ; defaultbgcolor="222222" ; fi
+	if [[ -z "$cache" ]] ; then
+		cache="${HOME}/.cache/new-roses"
+	fi
+	if [[ -z "$defaultkeyword" ]] ; then 
+		defaultkeyword="spring"
+	fi
+	if [[ -z "$defaultbgcolor" ]] ; then 
+		defaultbgcolor="222222"
+	fi
 	# if no arguments are given then run `unsplash` and `colorlovers`
 	if [ -z "$unsplashon" ] && [ -z "$colorloverson" ] && [ -z "$savefile" ]
 	then
@@ -127,6 +130,10 @@ getapi() {
 }
 
 setwal() {
+	wallpaper="$cache/wallpaper.png"
+	colorloversbadge="$cache/colorloversbadge.png"
+	colorloverswal="$cache/colorloverswal.png"
+	unsplashartistfile="$cache/wallpaperartist"
 	if [[ $colorloverson ]]
 	then
 		if [[ -z $wallpaperonly ]]
@@ -352,3 +359,5 @@ fi
 
 # stop using `wallpaper` to set wallpaper
 # test for -a flag and config file
+# organize variables in setwal() better
+# make credit more legible
