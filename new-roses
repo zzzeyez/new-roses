@@ -35,6 +35,11 @@ setup() {
 		unsplashon="true"
 		colorloverson="true"
 	fi
+	# if no background color is supplied, do default
+	if [[ -z $background ]] && [[ -z $lightmode ]] && [[ -z $wallpaperonly ]] 
+	then
+		background="-b $defaultbgcolor"
+	fi
 	if [[ $unsplashon ]]
 		then
 		if [[ -z "$unsplashapi" ]]
@@ -96,7 +101,7 @@ getapi() {
 			userscreenname="$(echo "$searchjson" | \
 			jq ".results | .[$entry] .user .username" | tr -d '"')"
 			userurl="$(echo "$searchjson" | \
-			jq ".results | .[$entry] .user .links .self" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
+			jq ".results | .[$entry] .user .links .html" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
 			photourl="$(echo "$searchjson" | \
 			jq ".results | .[$entry] .links .html" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
 		else
@@ -109,7 +114,7 @@ getapi() {
 			userscreenname="$(echo "$featuredjson" | \
 			jq ".[$entry] .user .username" | tr -d '"')"
 			userurl="$(echo "$featuredjson" | \
-			jq ".[$entry] .user .links .self" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
+			jq ".[$entry] .user .links .html" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
 			photourl="$(echo "$featuredjson" | \
 			jq ".[$entry] .links .html" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
 		fi
@@ -174,44 +179,46 @@ credits() {
 		BLU="\e[34m" && BLUBAR="$BLU$BAR$RST"
 		PUR="\e[35m" && PURBAR="$PUR$BAR$RST" 
 		CYN="\e[36m" && CYNBAR="$CYN$BAR$RST"
-		if [[ $unsplashon ]]
+		if [[ $unsplashon ]] && [[ -z $apimissing ]]
 		then
-			printf "%b" "$REDBAR wallpaper set as:"
-			printf "%b" "$GRNBAR $photourl"
-			printf "%b" "$YLWBAR photo by $username ($userscreenname)"
-			printf "%b" "$BLUBAR $userurl"
-			printf "%b" "$PURBAR photo supplied by https://unsplash.com/"
+			printf "%b" "$REDBAR wallpaper set as: \n"
+			printf "%b" "$GRNBAR $photourl \n"
+			printf "%b" "$YLWBAR photo by $username ($userscreenname) \n"
+			printf "%b" "$BLUBAR $userurl \n"
+			printf "%b" "$PURBAR photo supplied by https://unsplash.com/ \n"
 		fi
-		if [[ $colorloverson ]]
+		if [[ $colorloverson ]] && [[ -z $apimissing ]]
 		then
-			printf "%b" "$REDBAR color palette set as:"
-			printf "%b" "$GRNBAR $colorloverstitle by $colorloversusername"
-			printf "%b" "$YLWBAR courtesy of colorlovers.com"
+			printf "%b" "$REDBAR color palette set as: \n"
+			printf "%b" "$GRNBAR $colorloverstitle by $colorloversusername \n"
+			printf "%b" "$YLWBAR courtesy of colorlovers.com\n"
 		fi
 		if [[ $variableson ]]
 		then
-			printf "%b" "$REDBAR image url: $image"
-			printf "%b" "$GRNBAR unsplash api key: $unsplashapi"
-			printf "%b" "$YLWBAR unsplash api url: $unsplashurl"
-			printf "%b" "$BLUBAR search keyword: $keyword"
-			printf "%b" "$PURBAR entry number: $entry"
-			printf "%b" "$CYNBAR photo page: $photourl"
-			printf "%b" "$PURBAR author: $username ( $userscreenname )"
-			printf "%b" "$BLUBAR author's profile: $userurl"
-			printf "%b" "$YLWBAR photo supplied by https://unsplash.com/"
-			printf "%b" "$GRNBAR colorlovers api url: $colorloversurl"
-			printf "%b" "$REDBAR colorlovers image url: $colorloversimage"
-			printf "%b" "$GRNBAR colorlovers title: $colorloverstitle"
+			printf "%b" "$REDBAR image url: $image \n"
+			printf "%b" "$GRNBAR unsplash api key: $unsplashapi \n"
+			printf "%b" "$YLWBAR unsplash api url: $unsplashurl \n"
+			printf "%b" "$BLUBAR search keyword: $keyword \n"
+			printf "%b" "$PURBAR entry number: $entry \n"
+			printf "%b" "$CYNBAR photo page: $photourl \n"
+			printf "%b" "$PURBAR author: $username ( $userscreenname ) \n"
+			printf "%b" "$BLUBAR author's profile: $userurl \n"
+			printf "%b" "$YLWBAR photo supplied by https://unsplash.com/ \n"
+			printf "%b" "$GRNBAR colorlovers api url: $colorloversurl \n"
+			printf "%b" "$REDBAR colorlovers image url: $colorloversimage \n"
+			printf "%b" "$GRNBAR colorlovers title: $colorloverstitle \n"
 		fi
 		if [[ $apimissing ]]
 		then
-			printf "%b" "$REDBAR REQUIREMENT: GET YOUR OWN API KEY AT:"
-			printf "%b" "$GRNBAR https://unsplash.com/developers"
-			printf "%b" "$YLWBAR"
-			printf "%b" "$BLUBAR and then use it like so:"
-			printf "%b" "$PURBAR"
-			printf "%b" "$CYNBAR \touch \"\${HOME}/.config/api_keys\""
-			printf "%b" "$PURBAR echo \"unsplashapi=YOUR_API_KEY\" > \"\${HOME}/.config/api_keys\""
+			printf "%b" "$REDBAR wallpaper functions require API key: \n"
+			printf "%b" "$GRNBAR https://unsplash.com/developers \n"
+			printf "%b" "$YLWBAR \n"
+			printf "%b" "$BLUBAR and then use it like so: \n"
+			printf "%b" "$PURBAR \n"
+			printf "%b" "$CYNBAR touch \"\${HOME}/.config/api_keys\"\n"
+			printf "%b" "$PURBAR echo \"unsplashapi=YOUR_API_KEY\" > \"\${HOME}/.config/api_keys\" \n"
+			printf "%b" "$BLUBAR \n"
+			printf "%b" "$YLWBAR or you can manually edit it into the top of new-roses \n"
 		fi
 	fi
 }
