@@ -19,20 +19,19 @@ brew install jq imagemagick
 pip3 install pywal
 ```
 
-In order to fetch wallpaper images, you will need to obtain an Unsplash.com API key at https://unsplash.com/developers and then allow `new-roses` to use it:
+In order to fetch wallpaper images, you will need to obtain an Unsplash.com API key at https://unsplash.com/developers and then apply it to `new-roses` (this will create a config file at `~/.config/new-roses`).
 
 ```
-touch ${HOME}/.config/api_keys
-echo "unsplashapi=YOUR_API_KEY" > "${HOME/.config/api_keys"
+new-roses -a 'YOUR_KEY_HERE'
 ```
 
 ## Usage
 
-By default, a wallpaper from Unsplash and a color palette from Colorlovers are applied.  If no flags are provided, then any argument will be treated as a search term.  And if no flags or arguments are provided, then the search term "spring" and the background color "222222" will be used.  To use only Colorlovers or Unsplash use the -c or -u flags.
+By default, a wallpaper from Unsplash and a color palette from Colorlovers are applied with the search term "spring" and the background color "222222."  These defaults can be changed in the config file at `~/.config/new-roses`.  If no flags are provided, then any argument will be treated as a search term.
 
 ```
 Usage: new-roses [OPTION] [SEARCHTERM]
-       [-u] [-c] [-b 'color'] [-l] [-w] [-s 'searchterm']
+       [-a] [-u] [-c] [-b 'color'] [-l] [-w] [-s 'searchterm']
        [-d '/download/dir'] [-q] [-n] [-x] [-h]
        
 Example: new-roses spring
@@ -40,6 +39,7 @@ Example: new-roses spring
 	 new-roses -wnq 
 	 
 Optional arguments:
+  -a 'your_api_key'       Tell new-roses API key (creates config file).
   -u                      Apply wallpaper and color palette from Unsplash.com
   -c                      Apply color palette from Colorlovers.com
   -b 222222               Load colors directly from a colorscheme file.
@@ -49,7 +49,7 @@ Optional arguments:
 			  it will be treated as a search term)
   -d '/path/to/dir/'	  Save wallpaper to directory.
   -q                      Quiet mode, don't print anything.
-  -n			  Notify when finished (requires `notify-send`).
+  -n			  Notify when finished (requires notify-send).
   -x                      Print all variables (test yr API connnection).
   -h			  Display this help page and exit.
 ```
