@@ -65,21 +65,6 @@ setup() {
 	fi
 }
 
-rmcache() {
-	if [[ -z $wallpaperonly ]]
-	then
-		walcache="${cache////_}"
-		walcache="${HOME}/.cache/wal/schemes/${walcache//./_}"
-		rm -rf "$walcache"*
-	fi
-}
-
-defaults() {
-	keyword="$1"
-	searchon="true"
-	background="-b $defaultbgcolor"
-}
-
 getapi() {
 	# grab a random number to select from top results
 	entry="$((RANDOM%20))"
@@ -132,6 +117,22 @@ getapi() {
 			photourl="$(echo "$featuredjson" | \
 			jq ".[$entry] .links .html" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
 		fi
+		echo "$username" > "$unsplashartistfile"
+	fi
+}
+
+defaults() {
+	keyword="$1"
+	searchon="true"
+	background="-b $defaultbgcolor"
+}
+
+rmcache() {
+	if [[ -z $wallpaperonly ]]
+	then
+		walcache="${cache////_}"
+		walcache="${HOME}/.cache/wal/schemes/${walcache//./_}"
+		rm -rf "$walcache"*
 	fi
 }
 
@@ -194,17 +195,23 @@ credits() {
 		CYN="\e[36m" && CYNBAR="$CYN$BAR$RST"
 		if [[ $unsplashon ]] && [[ -z $apimissing ]]
 		then
-			printf "%b" "$REDBAR wallpaper set as: \n"
-			printf "%b" "$GRNBAR $photourl \n"
-			printf "%b" "$YLWBAR photo by $username ($userscreenname) \n"
-			printf "%b" "$BLUBAR $userurl \n"
-			printf "%b" "$PURBAR photo supplied by https://unsplash.com/ \n"
+			printf "%b" "$REDBAR \n"
+			printf "%b" "$GRNBAR photo by $username ($userscreenname) \n"
+			printf "%b" "$YLWBAR $userurl \n"
+			printf "%b" "$BLUBAR courtesy of Unsplash\n"
+			printf "%b" "$PURBAR \n"
 		fi
 		if [[ $colorloverson ]] && [[ -z $apimissing ]]
 		then
-			printf "%b" "$REDBAR color palette set as: \n"
-			printf "%b" "$GRNBAR $colorloverstitle by $colorloversusername \n"
-			printf "%b" "$YLWBAR courtesy of colorlovers.com\n"
+			if [[ -z $unsplashon ]]
+			then
+				printf "%b" "$REDBAR \n"
+			fi
+			printf "%b" "$GRNBAR color palette set as: \n"
+			printf "%b" "$YLWBAR $colorloverstitle by $colorloversusername \n"
+			printf "%b" "$BLUBAR courtesy of Colorlovers\n"
+			printf "%b" "$PURBAR \n"
+			
 		fi
 		if [[ $variableson ]]
 		then
@@ -360,11 +367,14 @@ fi
 ################
 
 # stop using `wallpaper` to set wallpaper
-# test for -a flag and config file
-# organize variables in setwal() better
-# make credit more legible
+#
+# make credits more legible
+#
 # pull from config for default search (not working)
-#     (-s flag search or no-flag search works fine)
+# (-s flag search or no-flag search works fine)
+# (maybe it's because the variables defined in getapi())
+# maybe it's line #358
+#
 # add config value to execute script after `new-roses`
 #
-# is -d ($unsplashartistfile) working?
+# is -d ($unsplashartistfile) working? (it should be, see ln #135)
