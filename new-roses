@@ -8,27 +8,34 @@
 #
 # requires `wal`, `imagemagick` and `jq`
 
-# requires API key from https://unsplash.com/developers
-source "${HOME}/.config/api_keys"
-#unsplashapi="YOUR_KEY_HERE"
-
-# where temporary files will be stored
-cache="${HOME}/.cache/new-roses"
-
-# default search keyword and background color
-# (this is ran if no arguments are provided)
-defaultkeyword="spring"
-defaultbgcolor="222222"
-
+# you can change these if you want
+config="${HOME}/.config/new-roses"
 wallpaper="$cache/wallpaper.png"
 colorloversbadge="$cache/colorloversbadge.png"
-colorloverswal="$cache/wal.png"
+colorloverswal="$cache/colorloverswal.png"
 unsplashartistfile="$cache/wallpaperartist"
+
+# just don't change these
 lightmode=""
 background=""
 
-# check for API key and cache dir
+createconfig() {
+	echo "unsplashapi=\"$1\"" > "$config" &&
+	echo "cache=\"${HOME}/.cache/new-roses\"" >> "$config" &
+	echo "defaultkeyword=\"spring\"" >> "$config" &
+	echo "defaultbgcolor=\"222222\"" >> "$config" &
+	echo "$config created with Unsplash API key of $1"
+}
+
 setup() {
+	# check for config
+	if [[ -e $config ]]
+		source "$config"
+	fi
+	# check for defaults
+	if [[ -z "$cache" ]] ; then ; cache="${HOME}/.cache/new-roses" ; fi
+	if [[ -z "$defaultkeyword" ]] ; then ; defaultkeyword="spring" ; fi
+	if [[ -z "$defaultbgcolor" ]] ; then ; defaultbgcolor="222222" ; fi
 	# if no arguments are given then run `unsplash` and `colorlovers`
 	if [ -z "$unsplashon" ] && [ -z "$colorloverson" ] && [ -z "$savefile" ]
 	then
@@ -55,7 +62,6 @@ setup() {
 	fi
 }
 
-# remove `wal` cache
 rmcache() {
 	if [[ -z $wallpaperonly ]]
 	then
@@ -71,7 +77,6 @@ defaults() {
 	background="-b $defaultbgcolor"
 }
 
-# fetch json data
 getapi() {
 	# grab a random number to select from top results
 	entry="$((RANDOM%20))"
@@ -121,7 +126,6 @@ getapi() {
 	fi
 }
 
-# set wallpaper and/or color palette
 setwal() {
 	if [[ $colorloverson ]]
 	then
@@ -215,10 +219,7 @@ credits() {
 			printf "%b" "$YLWBAR \n"
 			printf "%b" "$BLUBAR and then use it like so: \n"
 			printf "%b" "$PURBAR \n"
-			printf "%b" "$CYNBAR touch \"\${HOME}/.config/api_keys\"\n"
-			printf "%b" "$PURBAR echo \"unsplashapi=YOUR_API_KEY\" > \"\${HOME}/.config/api_keys\" \n"
-			printf "%b" "$BLUBAR \n"
-			printf "%b" "$YLWBAR or you can manually edit it into the top of new-roses \n"
+			printf "%b" "$CYNBAR new-roses -a YOUR_API_KEY\n"
 		fi
 	fi
 }
@@ -253,6 +254,7 @@ Example: new-roses spring
 	 new-roses -wnq
 	 
 Optional arguments:
+  -a 'your_api_key'       Tell new-roses API key (creates config file).
   -u                      Apply wallpaper and color palette from Unsplash.com
   -c                      Apply color palette from Colorlovers.com
   -b 222222               Load colors directly from a colorscheme file.
@@ -269,8 +271,12 @@ Optional arguments:
 }
 
 flags() {
-	while getopts ucb:lws:d:qnxh opt; do
+	while getopts a:ucb:lws:d:qnxh opt; do
 		case $opt in
+			a)
+			createconfig "$OPTARG"
+			exit
+			;;
 			u)
 			unsplashon="true"
 			;;
@@ -345,4 +351,4 @@ fi
 ################
 
 # stop using `wallpaper` to set wallpaper
-# (maybe just do `wal -ts`)
+# test for -a flag and config file
