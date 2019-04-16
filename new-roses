@@ -362,3 +362,5 @@ fi
 # organize variables in setwal() better
 # make credit more legible
 # pull from config for default search (not working)
+#     (-s flag search or no-flag search works fine)
+# add config value to execute script after `new-roses`
