@@ -4,31 +4,25 @@
 Grab system-appearance/wallpaper selections from online sources.
 
 ## Install
-
 Download and place `new-roses` in your $PATH:
-
 ```
 git clone https://github.com/zzzeyez/new-roses.git ~/Downloads/new-roses
 mv ~/Downloads/new-roses/new-roses /usr/local/bin
 ```
 
-And then install the depencies `jq`, `imagemagick` and `wal`:
-
+And then install the depencies `jq` and `wal`:
 ```
-brew install jq imagemagick
+brew install jq
 pip3 install pywal
 ```
 
-In order to fetch wallpaper images, you will need to obtain an Unsplash.com API key at https://unsplash.com/developers and then apply it to `new-roses` (this will create a config file at `~/.config/new-roses`).
-
+In order to fetch wallpaper images, you will need to obtain an Unsplash.com API key at https://unsplash.com/developers and then apply it to `new-roses` (this will create a config file at `~/.config/new-roses`):
 ```
 new-roses -a 'YOUR_KEY_HERE'
 ```
 
 ## Usage
-
-By default, a wallpaper from Unsplash and a color palette from Colorlovers are applied with the search term "spring" and the background color "222222."  These defaults can be changed in the config file at `~/.config/new-roses`.  If no flags are provided, then any argument will be treated as a search term.
-
+Just run it.  Or if you want to be more particular, then you can edit the config file at `~/.config/new-roses` or use one of the available flags
 ```
 Usage: new-roses [OPTION] [SEARCHTERM]
        [-a] [-u] [-c] [-b 'color'] [-l] [-w] [-s 'searchterm']
