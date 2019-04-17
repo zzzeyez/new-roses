@@ -140,6 +140,57 @@ rmcache() {
 	fi
 }
 
+setwallpaper() {
+    if [[ $colorloverson ]] || [[ $wallpaperonly ]]
+    then
+        # Get desktop environment.
+        de="${XDG_CURRENT_DESKTOP}"
+
+        # Fallback to using xprop.
+        [[ -z "$de" ]] && type -p xprop >/dev/null 2>&1 && \
+            de="$(xprop -root | awk '/KDE_SESSION_VERSION|^_MUFFIN|xfce4|xfce5/')"
+
+        case "$de" in
+            *"MUFFIN"* | *"Cinnamon"*) gsettings set org.cinnamon.desktop.background picture-uri "file://${wallpaper}" ;;
+            *"MATE"*) gsettings set org.mate.background picture-filename "$wallpaper" ;;
+            *"GNOME"*) gsettings set org.gnome.desktop.background picture-uri "file://${wallpaper}" ;;
+
+            *"XFCE"*)
+                xfconf-query --channel xfce4-desktop --property /backdrop/screen0/monitor0/image-path --set "$wallpaper" 2>/dev/null
+                xfconf-query --channel xfce4-desktop --property /backdrop/screen0/monitor0/workspace0/last-image --set "$wallpaper" 2>/dev/null
+            ;;
+
+            *)
+                if type -p feh >/dev/null; then
+                    feh --bg-fill "$wallpaper"
+
+                elif type -p nitrogen >/dev/null; then
+                    nitrogen --set-zoom-fill "$wallpaper"
+
+                elif type -p bgs >/dev/null; then
+                    bgs "$wallpaper"
+
+                elif type -p hsetroot >/dev/null; then
+                    hsetroot -fill "$wallpaper"
+
+                elif type -p habak >/dev/null; then
+                    habak -mS "$wallpaper"
+
+                elif [[ "$os" == "Darwin" ]]; then
+                    osascript -e 'tell application "Finder" to set desktop picture to POSIX file "'"${wallpaper/#\~/$HOME}"\"
+
+                else
+                    gsettings set org.gnome.desktop.background picture-uri "file://${wallpaper}"
+                fi
+            ;;
+        esac
+
+        out "wallpaper: Set new wallpaper"
+    else
+        out "wallpaper: '-n' was used, skipping wallpaper"
+    fi
+}
+
 setwal() {
 	if [[ $colorloverson ]]
 	then
@@ -158,7 +209,6 @@ setwal() {
 		if [[ $wallpaperonly ]] || [[ $colorloverson ]]
 		then
 			convert "$image" "$wallpaper" &&
-			wallpaper "$wallpaper"
 		else
 			convert "$image" "$wallpaper" &&
 			wal -i "$wallpaper" -o wal-set -q $background $lightmode
@@ -369,6 +419,7 @@ if [ "$#" -ne 0 ]; then
 	getapi
 	rmcache
 	setwal
+	setwallpaper
 	executeafter
 	notify
 	credits
@@ -379,6 +430,7 @@ else
 	getapi
 	rmcache
 	setwal
+	setwallpaper
 	executeafter
 	notify
 	credits
