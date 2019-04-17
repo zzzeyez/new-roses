@@ -141,7 +141,7 @@ rmcache() {
 }
 
 setwallpaper() {
-    if [[ $colorloverson ]] || [[ $wallpaperonly ]]
+    if [[ $wallpaperonly ]]
     then
         # Get desktop environment.
         de="${XDG_CURRENT_DESKTOP}"
@@ -161,7 +161,11 @@ setwallpaper() {
             ;;
 
             *)
-                if type -p feh >/dev/null; then
+				
+                if [[ "$os" == "Darwin" ]]; then
+                    osascript -e 'tell application "Finder" to set desktop picture to POSIX file "'"${wallpaper/#\~/$HOME}"\"
+
+				elif type -p feh >/dev/null; then
                     feh --bg-fill "$wallpaper"
 
                 elif type -p nitrogen >/dev/null; then
@@ -176,18 +180,11 @@ setwallpaper() {
                 elif type -p habak >/dev/null; then
                     habak -mS "$wallpaper"
 
-                elif [[ "$os" == "Darwin" ]]; then
-                    osascript -e 'tell application "Finder" to set desktop picture to POSIX file "'"${wallpaper/#\~/$HOME}"\"
-
                 else
                     gsettings set org.gnome.desktop.background picture-uri "file://${wallpaper}"
                 fi
             ;;
         esac
-
-        out "wallpaper: Set new wallpaper"
-    else
-        out "wallpaper: '-n' was used, skipping wallpaper"
     fi
 }
 
@@ -208,7 +205,7 @@ setwal() {
 	then
 		if [[ $wallpaperonly ]] || [[ $colorloverson ]]
 		then
-			convert "$image" "$wallpaper" &&
+			convert "$image" "$wallpaper"
 		else
 			convert "$image" "$wallpaper" &&
 			wal -i "$wallpaper" -o wal-set -q $background $lightmode
