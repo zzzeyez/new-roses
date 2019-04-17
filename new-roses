@@ -26,7 +26,7 @@ getconfig() {
 		cache="${HOME}/.cache/new-roses"
 	fi
 	if [[ -z "$defaultkeyword" ]] ; then 
-		defaultkeyword="spring"
+		defaultkeyword="flowers"
 	fi
 	if [[ -z "$defaultbgcolor" ]] ; then 
 		defaultbgcolor="222222"
@@ -41,8 +41,10 @@ getconfig() {
 createconfig() {
 	echo "unsplashapi=\"$1\"" > "$config" &&
 	echo "cache=\"${HOME}/.cache/new-roses\"" >> "$config"
-	echo "defaultkeyword=\"spring\"" >> "$config"
+	echo "defaultkeyword=\"flowers\"" >> "$config"
 	echo "defaultbgcolor=\"222222\"" >> "$config"
+	echo "# in case you need to execute something after new-roses:" >> "$config"
+	echo "executeafter=" >> "$config"
 	echo "config file $config created with Unsplash API key of $1"
 }
 
@@ -164,6 +166,13 @@ setwal() {
 	fi
 }
 
+executeafter() {
+	if [[ "$executeafter" ]]
+	then
+		bash "$executeafter"
+	fi
+}
+
 notify() {
 	if [[ $notifyon ]]
 	then
@@ -214,6 +223,11 @@ credits() {
 			printf "%b" "$BLUBAR courtesy of Colorlovers\n"
 			printf "%b" "$PURBAR \n"
 			
+		fi
+		if [[ $keyword ]]
+		then
+			printf "%b" "$REDBAR search term: $keyword \n"
+			printf "%b" "$GRNBAR \n"
 		fi
 		if [[ $variableson ]]
 		then
@@ -274,19 +288,18 @@ Example: new-roses spring
 	 
 Optional arguments:
   -a 'your_api_key'       Tell new-roses API key (creates config file).
-  -u                      Apply wallpaper and color palette from Unsplash.com
-  -c                      Apply color palette from Colorlovers.com
-  -b 222222               Load colors directly from a colorscheme file.
+  -u                      Grab palette from wallpaper instead of Colorlovers.com 
+  -c                      Apply color palette only.
+  -b 222222               Background color.
   -l                      Use light color palette.
-  -w			  Skip setting color palette.
+  -w                      Skip setting color palette.
   -s 'searchterm'         Use search term (if an argument with no flags is provided
-			  it will be treated as a search term)
+                          it will also be treated as a search term)
   -d '/path/to/dir/'	  Save wallpaper to directory.
   -q                      Quiet mode, don't print anything.
-  -n			  Notify when finished (requires notify-send).
+  -n                      Notify when finished (requires notify-send).
   -x                      Print all variables (test yr API connnection).
-  -h			  Display this help page and exit.
-"
+  -h                      Display this help page and exit."
 }
 
 flags() {
@@ -306,7 +319,7 @@ flags() {
 			background="-b $OPTARG"
 			;;
 			l)
-			lightmode="-l"
+			lightmode="-l --saturate 0.3"
 			;;
 			w)
 			wallpaperonly="true"
@@ -344,6 +357,8 @@ flags() {
 	if [ "$1" != "-*" ] && [ "$1" ] ;
 	then
 		defaults "$1"
+	else
+		defaults "$defaultkeyword"
 	fi
 }
 
@@ -354,15 +369,17 @@ if [ "$#" -ne 0 ]; then
 	getapi
 	rmcache
 	setwal
+	executeafter
 	notify
 	credits
 else
 	getconfig
 	setup
-	getapi
 	defaults "$defaultkeyword"
+	getapi
 	rmcache
 	setwal
+	executeafter
 	notify
 	credits
 fi
@@ -372,7 +389,3 @@ fi
 ################
 
 # stop using `wallpaper` to set wallpaper
-#
-# add config value to execute script after `new-roses`
-#
-# is -d ($unsplashartistfile) working? (it should be, see ln #135)
