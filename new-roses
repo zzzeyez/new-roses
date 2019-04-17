@@ -437,3 +437,4 @@ fi
 
 # stop using `wallpaper` to set wallpaper
 # (pretty much finished, just need to unset $wallpapermethod if empty
+# and make macos change more than one workspace
