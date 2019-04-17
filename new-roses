@@ -30,7 +30,7 @@ getconfig() {
 	fi
 	if [[ -z "$defaultbgcolor" ]] ; then 
 		defaultbgcolor="222222"
-	fi
+	fi	
 	# these can be defined now that setup() checked for config
 	wallpaper="$cache/wallpaper.png"
 	unsplashartistfile="$cache/wallpaperartist"
@@ -140,59 +140,11 @@ rmcache() {
 	fi
 }
 
-setwallpaper() {
-    if [[ $wallpaperonly ]]
-    then
-        # Get desktop environment.
-        de="${XDG_CURRENT_DESKTOP}"
-
-        # Fallback to using xprop.
-        [[ -z "$de" ]] && type -p xprop >/dev/null 2>&1 && \
-            de="$(xprop -root | awk '/KDE_SESSION_VERSION|^_MUFFIN|xfce4|xfce5/')"
-
-        case "$de" in
-            *"MUFFIN"* | *"Cinnamon"*) gsettings set org.cinnamon.desktop.background picture-uri "file://${wallpaper}" ;;
-            *"MATE"*) gsettings set org.mate.background picture-filename "$wallpaper" ;;
-            *"GNOME"*) gsettings set org.gnome.desktop.background picture-uri "file://${wallpaper}" ;;
-
-            *"XFCE"*)
-                xfconf-query --channel xfce4-desktop --property /backdrop/screen0/monitor0/image-path --set "$wallpaper" 2>/dev/null
-                xfconf-query --channel xfce4-desktop --property /backdrop/screen0/monitor0/workspace0/last-image --set "$wallpaper" 2>/dev/null
-            ;;
-
-            *)
-				
-                if [[ "$os" == "Darwin" ]]; then
-                    osascript -e 'tell application "Finder" to set desktop picture to POSIX file "'"${wallpaper/#\~/$HOME}"\"
-
-				elif type -p feh >/dev/null; then
-                    feh --bg-fill "$wallpaper"
-
-                elif type -p nitrogen >/dev/null; then
-                    nitrogen --set-zoom-fill "$wallpaper"
-
-                elif type -p bgs >/dev/null; then
-                    bgs "$wallpaper"
-
-                elif type -p hsetroot >/dev/null; then
-                    hsetroot -fill "$wallpaper"
-
-                elif type -p habak >/dev/null; then
-                    habak -mS "$wallpaper"
-
-                else
-                    gsettings set org.gnome.desktop.background picture-uri "file://${wallpaper}"
-                fi
-            ;;
-        esac
-    fi
-}
-
 setwal() {
 	if [[ $colorloverson ]]
 	then
 		if [[ -z $wallpaperonly ]]
-		then
+		then			
 			# make palette more dynamic by adding a gradient to `wal` source image
 			convert "$colorloversimage" "$colorloversbadge"
 			convert -size 228x161 gradient: /tmp/gradient.png
@@ -203,15 +155,60 @@ setwal() {
 	fi
 	if [[ $unsplashon ]]
 	then
-		if [[ $wallpaperonly ]] || [[ $colorloverson ]]
+		convert "$image" "$wallpaper"
+		if [[ -z $wallpaperonly ]] || [[ -z $colorloverson ]]
 		then
-			convert "$image" "$wallpaper"
-		else
-			convert "$image" "$wallpaper" &&
 			wal -i "$wallpaper" -o wal-set -q $background $lightmode
 		fi
 	fi
 }
+
+setwallpaper() {
+	if [[ $unsplashon ]]
+	then
+		if [[ $wallpaperonly ]] || [[ $colorloverson ]]
+		then
+			if[[ $wallpapermethod ]]
+			then
+				bash "$wallpapermethod" "$wallpaper"
+			else
+				de="${XDG_CURRENT_DESKTOP}"
+				os="$(uname)"
+				# Fallback to using xprop.
+				[[ -z "$de" ]] && type -p xprop >/dev/null 2>&1 && \
+				de="$(xprop -root | awk '/KDE_SESSION_VERSION|^_MUFFIN|xfce4|xfce5/')"
+				case "$de" in
+					*"MUFFIN"* | *"Cinnamon"*) gsettings set org.cinnamon.desktop.background picture-uri "file://${wallpaper}" ;;
+					*"MATE"*) gsettings set org.mate.background picture-filename "$wallpaper" ;;
+					*"GNOME"*) gsettings set org.gnome.desktop.background picture-uri "file://${wallpaper}" ;;
+					*"XFCE"*)
+						xfconf-query --channel xfce4-desktop --property /backdrop/screen0/monitor0/image-path --set "$wallpaper" 2>/dev/null
+						xfconf-query --channel xfce4-desktop --property /backdrop/screen0/monitor0/workspace0/last-image --set "$wallpaper" 2>/dev/null
+					;;
+					*)
+						if [[ "$os" == "Darwin" ]]; then
+							osascript -e 'tell application "Finder" to set desktop picture to POSIX file "'"$wallpaper"\"
+						elif type -p feh >/dev/null; then
+							feh --bg-fill "$wallpaper"
+						elif type -p nitrogen >/dev/null; then
+							nitrogen --set-zoom-fill "$wallpaper"
+						elif type -p bgs >/dev/null; then
+							bgs "$wallpaper"
+						elif type -p hsetroot >/dev/null; then
+							hsetroot -fill "$wallpaper"
+						elif type -p habak >/dev/null; then
+							habak -mS "$wallpaper"
+						else
+							gsettings set org.gnome.desktop.background picture-uri "file://${wallpaper}"
+						fi
+					;;
+				esac
+
+			fi
+		fi
+	fi
+}
+
 
 executeafter() {
 	if [[ "$executeafter" ]]
