@@ -45,6 +45,8 @@ createconfig() {
 	echo "defaultbgcolor=\"222222\"" >> "$config"
 	echo "# in case you need to execute something after new-roses:" >> "$config"
 	echo "executeafter=" >> "$config"
+	echo "# like maybe \"feh --bg-fill\":" >> "$config"
+	echo "wallpapermethod=" >> "$config"
 	echo "config file $config created with Unsplash API key of $1"
 }
 
@@ -141,22 +143,19 @@ rmcache() {
 }
 
 setwal() {
-	if [[ $colorloverson ]]
+	if [[ $colorloverson ]] && [[ -z $wallpaperonly ]]
 	then
-		if [[ -z $wallpaperonly ]]
-		then			
-			# make palette more dynamic by adding a gradient to `wal` source image
-			convert "$colorloversimage" "$colorloversbadge"
-			convert -size 228x161 gradient: /tmp/gradient.png
-			composite /tmp/gradient.png -compose Soft_light "$colorloversbadge" "$colorloverswal"
-			# apply `wal`
-			wal -i "$colorloverswal" -q -n $background $lightmode 
-		fi
+		# make palette more dynamic by adding a gradient to `wal` source image
+		convert "$colorloversimage" "$colorloversbadge"
+		convert -size 228x161 gradient: /tmp/gradient.png
+		composite /tmp/gradient.png -compose Soft_light "$colorloversbadge" "$colorloverswal"
+		# apply `wal`
+		wal -i "$colorloverswal" -q -n $background $lightmode 
 	fi
 	if [[ $unsplashon ]]
 	then
 		convert "$image" "$wallpaper"
-		if [[ -z $wallpaperonly ]] || [[ -z $colorloverson ]]
+		if [[ -z $wallpaperonly ]] && [[ -z $colorloverson ]]
 		then
 			wal -i "$wallpaper" -o wal-set -q $background $lightmode
 		fi
@@ -168,7 +167,7 @@ setwallpaper() {
 	then
 		if [[ $wallpaperonly ]] || [[ $colorloverson ]]
 		then
-			if[[ $wallpapermethod ]]
+			if [[ $wallpapermethod ]]
 			then
 				bash "$wallpapermethod" "$wallpaper"
 			else
@@ -434,4 +433,7 @@ fi
 #    TO DO     #
 ################
 
+# defaultbgcolor breaks -l
+
 # stop using `wallpaper` to set wallpaper
+# (pretty much finished, just need to unset $wallpapermethod if empty
