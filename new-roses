@@ -36,6 +36,11 @@ getconfig() {
 	unsplashartistfile="$cache/wallpaperartist"
 	colorloversbadge="$cache/colorloversbadge.png"
 	colorloverswal="$cache/colorloverswal.png"
+	if [ ! -d "$cache" ]
+	then
+		mkdir "$cache"
+		touch "$unsplashartistfile"
+	fi
 }
 
 createconfig() {
@@ -52,7 +57,7 @@ createconfig() {
 
 setup() {
 	# if no arguments are given then run `unsplash` and `colorlovers`
-	if [ -z "$unsplashon" ] && [ -z "$colorloverson" ] && [ -z "$savefile" ]
+	if [ -z "$unsplashon" ] && [ -z "$colorloverson" ] && [ -z "$savefile" ] && [ -z "$wallpaperfile" ]
 	then
 		unsplashon="true"
 		colorloverson="true"
@@ -70,11 +75,6 @@ setup() {
 			apimissing="true"
 		fi
 	fi	
-	if [ ! -d "$cache" ]
-	then
-		mkdir "$cache"
-		touch "$unsplashartistfile"
-	fi
 }
 
 getapi() {
@@ -130,7 +130,6 @@ getapi() {
 defaults() {
 	keyword="$1"
 	searchon="true"
-	background="-b $defaultbgcolor"
 }
 
 rmcache() {
@@ -157,28 +156,35 @@ setwal() {
 		convert "$image" "$wallpaper"
 		if [[ -z $wallpaperonly ]] && [[ -z $colorloverson ]]
 		then
-			wal -i "$wallpaper" -o wal-set -q $background $lightmode
+			wal -i "$wallpaper" -q $background $lightmode
+		fi
+	fi
+	if [[ $wallpaperfile ]]
+	then
+		convert "$wallpaperfile" "$wallpaper"
+		if [[ -z $wallpaperonly ]]	
+		then
+			wal -i "$wallpaper" -q $background $lightmode 
 		fi
 	fi
 }
 
 macwallpaper() {
-
-								METHOD=$(sw_vers -productVersion | awk -F'.' '{ if ($1 < 10 || $2 < 9) \
-								{ print "osascript" } else{ print "sqlite3"  } }')
-								case $METHOD in
-							        osascript)
-									osascript -e "tell application \"Finder\" to set desktop picture \
-									to POSIX file \"${1}\""
+	METHOD=$(sw_vers -productVersion | awk -F'.' '{ if ($1 < 10 || $2 < 9) \
+	{ print "osascript" } else{ print "sqlite3"  } }')
+	case $METHOD in
+	osascript)
+		osascript -e "tell application \"Finder\" to set desktop picture \
+		to POSIX file \"${1}\""
 	;;
 	sqlite3)
 		current_path=$(sqlite3 -noheader -batch \
-			${HOME}/Library/Application\ Support/Dock/desktoppicture.db \
-			'select value from data limit 1')
+		${HOME}/Library/Application\ Support/Dock/desktoppicture.db \
+		'select value from data limit 1')
 		if [[ "$current_path" != "$1" ]]; then
-			sqlite3 ${HOME}/Library/Application\ Support/Dock/desktoppicture.db \
-				"update data set value = '${1}'" && killall Dock
-		fi
+		sqlite3 ${HOME}/Library/Application\ Support/Dock/desktoppicture.db \
+		"update data set value = '${1}'" && killall Dock
+	fi
 	;;
 	*)
 		echo "error setting wallpaper" && exit 1
@@ -187,7 +193,7 @@ macwallpaper() {
 }
 
 setwallpaper() {
-	if [[ $unsplashon ]]
+	if [[ $unsplashon ]] || [[ $wallpaperfile ]]
 	then
 		if [[ $wallpaperonly ]] || [[ $colorloverson ]]
 		then
@@ -210,8 +216,9 @@ setwallpaper() {
 					;;
 					*)
 						if [[ "$os" == "Darwin" ]]; then
+							# `osascript` prevents using same file consecutively
 							if [[ ! -e "$cache/black.png" ]] ; then
-								convert -size 5x5 xc:"$color0" "$image2" 
+								convert -size 5x5 xc:"#000000" "$cache/black.png" 
 							fi
 							macwallpaper "$cache/black.png"
 							macwallpaper "$wallpaper"
@@ -230,7 +237,6 @@ setwallpaper() {
 						fi
 					;;
 				esac
-
 			fi
 		fi
 	fi
@@ -247,19 +253,15 @@ executeafter() {
 notify() {
 	if [[ $notifyon ]]
 	then
-		if [[ $colorloverson ]]
+		if [[ $unsplashon ]]
 		then
-			if [[ $unsplashon ]]
-			then
-				notify-send -i "$wallpaper" -m "photo by $username ($userscreenname)"
-			else
-				notify-send -m "color palette: $colorloverstitle by $colorloversusername"
-			fi
-		else
-			if [[ $unsplashon ]]
-			then
-				notify-send -i "$wallpaper" -m "photo by $username ($userscreenname)"
-			fi
+			notify-send -i "$wallpaper" -m "photo by $username ($userscreenname)"
+		elif [[ $wallpaperfile ]]
+		then
+			notify-send -i "$wallpaper" -m "wallpaper set as $wallpaperfile"
+		elif [[ $colorlovers ]]
+		then
+			notify-send -m "color palette: $colorloverstitle by $colorloversusername"
 		fi
 	fi
 }
@@ -292,13 +294,18 @@ credits() {
 			printf "%b" "$GRNBAR color palette set as: \n"
 			printf "%b" "$YLWBAR $colorloverstitle by $colorloversusername \n"
 			printf "%b" "$BLUBAR courtesy of Colorlovers\n"
-			printf "%b" "$PURBAR \n"
-			
+			printf "%b" "$PURBAR \n"	
 		fi
 		if [[ $keyword ]]
 		then
 			printf "%b" "$REDBAR search term: $keyword \n"
 			printf "%b" "$GRNBAR \n"
+		fi
+		if [[ $wallpaperfile ]]
+		then
+			printf "%b" "$REDBAR \n"
+			printf "%b" "$GRNBAR wallpaper set as $(basename $wallpaperfile) \n"
+			printf "%b" "$BLUBAR \n"
 		fi
 		if [[ $variableson ]]
 		then
@@ -333,12 +340,12 @@ save() {
 	echo "${savename// /}"
 	savefile="$savedir/"${savename// /}""
 	if [[ -e $savefile.png ]] ; then
-	    i=0
-	    while [[ -e $savefile-$i.png ]] 
+	    i=2
+	    while [[ -e $savefile$i.png ]] 
 		do
 	        (( i++ ))
 	    done
-	    savefile=$savefile-$i
+	    savefile=$savefile$i
 	fi
 	cp "$wallpaper" "$savefile.png" &&
 	echo "$savefile.png saved" &
@@ -394,7 +401,6 @@ flags() {
 			;;
 			w)
 			wallpaperonly="true"
-			unsplashon="true"
 			;;
 			s)
 			keyword="$OPTARG"
@@ -427,7 +433,12 @@ flags() {
 	shift "$((OPTIND-1))" 
 	if [ "$1" != "-*" ] && [ "$1" ] ;
 	then
-		defaults "$1"
+		if [ -f "$1" ] ; then
+			echo $(basename $1) | sed "s/\..*//" > "$unsplashartistfile"
+			wallpaperfile="$1"
+		else
+			defaults "$1"
+		fi
 	else
 		defaults "$defaultkeyword"
 	fi
