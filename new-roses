@@ -106,9 +106,9 @@ getapi() {
 			userscreenname="$(echo "$searchjson" | \
 			jq ".results | .[$entry] .user .username" | tr -d '"')"
 			userurl="$(echo "$searchjson" | \
-			jq ".results | .[$entry] .user .links .html" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
+			jq ".results | .[$entry] .user .links .html" | tr -d '"')"
 			photourl="$(echo "$searchjson" | \
-			jq ".results | .[$entry] .links .html" | tr -d '"')?utm_source=new-roses&utm_medium=referral"
+			jq ".results | .[$entry] .links .html" | tr -d '"')"
 		else
 			unsplashurl="https://api.unsplash.com/photos?client_id=$unsplashapi&featured&per_page=20"
 			featuredjson=$(curl -s "$unsplashurl")
