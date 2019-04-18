@@ -162,6 +162,30 @@ setwal() {
 	fi
 }
 
+macwallpaper() {
+
+								METHOD=$(sw_vers -productVersion | awk -F'.' '{ if ($1 < 10 || $2 < 9) \
+								{ print "osascript" } else{ print "sqlite3"  } }')
+								case $METHOD in
+							        osascript)
+									osascript -e "tell application \"Finder\" to set desktop picture \
+									to POSIX file \"${1}\""
+	;;
+	sqlite3)
+		current_path=$(sqlite3 -noheader -batch \
+			${HOME}/Library/Application\ Support/Dock/desktoppicture.db \
+			'select value from data limit 1')
+		if [[ "$current_path" != "$1" ]]; then
+			sqlite3 ${HOME}/Library/Application\ Support/Dock/desktoppicture.db \
+				"update data set value = '${1}'" && killall Dock
+		fi
+	;;
+	*)
+		echo "error setting wallpaper" && exit 1
+	;;
+	esac						
+}
+
 setwallpaper() {
 	if [[ $unsplashon ]]
 	then
@@ -186,7 +210,11 @@ setwallpaper() {
 					;;
 					*)
 						if [[ "$os" == "Darwin" ]]; then
-							osascript -e 'tell application "Finder" to set desktop picture to POSIX file "'"$wallpaper"\"
+							if [[ ! -e "$cache/black.png" ]] ; then
+								convert -size 5x5 xc:"$color0" "$image2" 
+							fi
+							macwallpaper "$cache/black.png"
+							macwallpaper "$wallpaper"
 						elif type -p feh >/dev/null; then
 							feh --bg-fill "$wallpaper"
 						elif type -p nitrogen >/dev/null; then
