@@ -3,26 +3,13 @@
 
 Grab system-appearance/wallpaper selections from online sources.
 
-## Install
-Download and place `new-roses` in your $PATH:
-```
-git clone https://github.com/zzzeyez/new-roses.git ~/Downloads/new-roses
-mv ~/Downloads/new-roses/new-roses /usr/local/bin
-```
-
-And then install the depencies `jq` and `wal`:
-```
-brew install jq
-pip3 install pywal
-```
-
-In order to fetch wallpaper images, you will need to obtain an Unsplash.com API key at https://unsplash.com/developers and then apply it to `new-roses` (this will create a config file at `~/.config/new-roses`):
-```
-new-roses -a 'YOUR_KEY_HERE'
-```
-
 ## Usage
-Just run it.  Or if you want to be more particular, then you can edit the config file at `~/.config/new-roses` or use one of the available flags
+Run `new-roses` with or without a search term to retrieve a wallpaper and system colorscheme.  
+```
+new-roses nature
+```
+
+Or, if you want to be more particular, then you can edit the config file at `~/.config/new-roses` or use one of the available flags:
 ```
 Usage: new-roses [OPTION] [SEARCHTERM]
        [-a] [-u] [-c] [-b 'color'] [-l] [-w] [-s 'searchterm']
@@ -46,4 +33,22 @@ Optional arguments:
   -n			  Notify when finished (requires notify-send).
   -x                      Print all variables (test yr API connnection).
   -h			  Display this help page and exit.
+```
+
+## Installation
+Download and place `new-roses` in your $PATH:
+```
+git clone https://github.com/zzzeyez/new-roses.git ~/Downloads/new-roses
+mv ~/Downloads/new-roses/new-roses /usr/local/bin
+```
+
+And then install the depencies `jq` and `wal`:
+```
+brew install jq
+pip3 install pywal
+```
+
+In order to fetch wallpaper images, you will need to obtain an Unsplash.com API key at https://unsplash.com/developers and then apply it to `new-roses` (this will create a config file at `~/.config/new-roses`):
+```
+new-roses -a 'YOUR_KEY_HERE'
 ```
