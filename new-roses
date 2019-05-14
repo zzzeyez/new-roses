@@ -6,12 +6,12 @@
 #
 # requires `imagemagick` and `jq`
 
+#unsplashapi=""
+
 wallpaper="/tmp/wallpaper.png"
 unsplashartistfile="/tmp/wallpaperartist"
 keyword="roses"
 config="${HOME}/.config/new-roses"
-
-#unsplashapi=""
 dummy="/tmp/dummy.png"
 
 setup() {
@@ -19,7 +19,7 @@ setup() {
 		echo "$api" > "$config"
 	fi
 	if [[ -f "$config" ]] ; then
-		unsplashapi="$(cat $config)"
+		unsplashapi="$(cat "$config")"
 	fi
 	if [[ -z "$unsplashapi" ]] ; then
 		echo "no unsplash api... run this to apply one:"
@@ -57,10 +57,10 @@ macwallpaper() {
 	;;
 	sqlite3)
 		current_path=$(sqlite3 -noheader -batch \
-		${HOME}/Library/Application\ Support/Dock/desktoppicture.db \
+		"${HOME}"/Library/Application\ Support/Dock/desktoppicture.db \
 		'select value from data limit 1')
 		if [[ "$current_path" != "$1" ]]; then
-		sqlite3 ${HOME}/Library/Application\ Support/Dock/desktoppicture.db \
+		sqlite3 "${HOME}"/Library/Application\ Support/Dock/desktoppicture.db \
 		"update data set value = '${1}'" && killall Dock
 	fi
 	;;
@@ -111,14 +111,16 @@ setwallpaper() {
 	if [[ "$notifyon" ]] ; then
 		notify-send "photo by $username via Unsplash.com"
 	fi
-	echo "photo by $username ($userscreenname) via unsplash.com"
-	echo "$photourl"
+	if [[ -z "$quietmodeon" ]] ; then
+		echo "photo by $username ($userscreenname) via unsplash.com"
+		echo "$photourl"
+	fi
 }
 
 save() {
 	savedir="$1"
 	savename="$(cat $unsplashartistfile)"
-	savefile="$savedir/"${savename// /}""
+	savefile="$savedir/${savename// /}"
 	if [[ -e $savefile.png ]] ; then
 	    i=2
 	    while [[ -e $savefile$i.png ]] 
@@ -128,11 +130,29 @@ save() {
 	    savefile=$savefile$i
 	fi
 	cp "$wallpaper" "$savefile.png" &&
-	echo "$savefile.png saved" &
+	if [[ -z "$quietmodeon" ]] ; then
+		echo "$savefile.png saved"
+	fi
 	if [[ "$notifyon" ]]
 	then
 		notify-send -m "$savefile.png saved" -i "$savefile.png"	
 	fi
+}
+
+help() {
+	printf \
+"usage: new-roses [OPTION] [SEARCHTERM]
+      [-a] [-n] [-s ~/download/dir] [-q]
+       
+example: new-roses spring
+	 
+optional arguments:
+  -a 'your_api_key'       tell new-roses API key
+                          from https://unsplash.com/developers
+  -s '/path/to/dir/'	  save wallpaper to directory
+  -n                      notify when finished (requires notify-send)
+  -h                      display this help page and exit
+  -q                      quiet mode (print nothing)"
 }
 
 flags() {
@@ -189,4 +209,5 @@ fi
 # stop using `wallpaper` to set wallpaper
 # (pretty much finished, just need to unset $wallpapermethod if empty
 # and make macos change more than one workspace
+
 

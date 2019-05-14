@@ -13,7 +13,7 @@ an API key is required for now.  you can get one at unsplash.com and apply it wi
 
 ```
 Usage: new-roses [OPTION] [SEARCHTERM]
-       [-a] [-n] [-s ~/download/dir] 
+       [-a] [-n] [-s ~/download/dir] [-q]
        
 Example: new-roses spring
 	 
@@ -22,6 +22,7 @@ Optional arguments:
   -s '/path/to/dir/'	  Save wallpaper to directory.
   -n			          Notify when finished (requires notify-send).
   -h			          Display this help page and exit.
+  -q                      Quiet mode (print nothing).
 ```
 
 ## installation
