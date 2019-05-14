@@ -9,8 +9,25 @@
 wallpaper="/tmp/wallpaper.png"
 unsplashartistfile="/tmp/wallpaperartist"
 keyword="roses"
-unsplashapi="eab5f4fd51b7c4a671a90fb716b540757d9589e493570f83fc8584174bef43bf"
+config="${HOME}/.config/new-roses"
+
+#unsplashapi=""
 dummy="/tmp/dummy.png"
+
+setup() {
+	if [[ "$api" ]] ; then
+		echo "$api" > "$config"
+	fi
+	if [[ -f "$config" ]] ; then
+		unsplashapi="$(cat $config)"
+	fi
+	if [[ -z "$unsplashapi" ]] ; then
+		echo "no unsplash api... run this to apply one:"
+		echo "new-rose -a your_api_key"
+		echo "exiting.."
+		exit
+	fi
+}
 
 getapi() {
 	# grab a random number to select from top results
@@ -94,12 +111,13 @@ setwallpaper() {
 	if [[ "$notifyon" ]] ; then
 		notify-send "photo by $username via Unsplash.com"
 	fi
+	echo "photo by $username ($userscreenname) via unsplash.com"
+	echo "$photourl"
 }
 
 save() {
 	savedir="$1"
 	savename="$(cat $unsplashartistfile)"
-	echo "${savename// /}"
 	savefile="$savedir/"${savename// /}""
 	if [[ -e $savefile.png ]] ; then
 	    i=2
@@ -118,8 +136,11 @@ save() {
 }
 
 flags() {
-	while getopts s:qnh opt; do
+	while getopts a:s:qnh opt; do
 		case $opt in
+			a)
+			api="$OPTARG"
+			;;
 			s)
 			save "$OPTARG"
 			exit
@@ -150,9 +171,11 @@ flags() {
 
 if [ "$#" -ne 0 ]; then
 	flags "$@"
+	setup
 	getapi
 	setwallpaper
 else
+	setup
 	getapi
 	setwallpaper
 fi
@@ -167,7 +190,3 @@ fi
 # (pretty much finished, just need to unset $wallpapermethod if empty
 # and make macos change more than one workspace
 
-# possibly move unsplash functionality to own program
-
-# grab actual hex codes and create .json file like:
-#echo '{"foo": "lorem", "special": {"background": "#333333"}, "bar": "ipsum"}' | jq . > /tmp/jqtest
