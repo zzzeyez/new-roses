@@ -52,16 +52,12 @@ macwallpaper() {
 	{ print "osascript" } else{ print "sqlite3"  } }')
 	case $METHOD in
 	osascript)
-		osascript -e "tell application \"Finder\" to set desktop picture \
-		to POSIX file \"${1}\""
+		osascript -e "tell application \"Finder\" to set desktop picture to POSIX file \"${1}\""
 	;;
 	sqlite3)
-		current_path=$(sqlite3 -noheader -batch \
-		"${HOME}"/Library/Application\ Support/Dock/desktoppicture.db \
-		'select value from data limit 1')
+		current_path=$(sqlite3 -noheader -batch "${HOME}"/Library/Application\ Support/Dock/desktoppicture.db 'select value from data limit 1')
 		if [[ "$current_path" != "$1" ]]; then
-		sqlite3 "${HOME}"/Library/Application\ Support/Dock/desktoppicture.db \
-		"update data set value = '${1}'" && killall Dock
+		sqlite3 "${HOME}"/Library/Application\ Support/Dock/desktoppicture.db "update data set value = '${1}'" && killall Dock
 	fi
 	;;
 	*)
@@ -205,11 +201,4 @@ fi
 ################
 #    TO DO     #
 ################
-
-# defaultbgcolor breaks -l
-
-# stop using `wallpaper` to set wallpaper
-# (pretty much finished, just need to unset $wallpapermethod if empty
-# and make macos change more than one workspace
-
 
