@@ -42,8 +42,8 @@ getapi() {
 		jq ".results | .[$entry] .user .username" | tr -d '"')"
 	userurl="$(echo "$searchjson" | \
 		jq ".results | .[$entry] .user .links .html" | tr -d '"')"
-	photourl="$(echo "$searchjson" | \
-		jq ".results | .[$entry] .links .html" | tr -d '"')"
+	#photourl="$(echo "$searchjson" | \
+		#jq ".results | .[$entry] .links .html" | tr -d '"')"
 	echo "$username" > "$unsplashartistfile"
 }
 
@@ -108,12 +108,14 @@ setwallpaper() {
 			fi
 			;;
 		esac
-	if [[ "$notifyon" ]] ; then
-		notify-send "photo by $username via Unsplash.com"
+	if [ -x "$notify" ]
+	then
+		notify-send -i "$wallpaper" -m "photo by $username via Unsplash.com"
 	fi
-	if [[ -z "$quietmodeon" ]] ; then
+	if [[ -z "$quietmodeon" ]]
+	then
 		echo "photo by $username ($userscreenname) via unsplash.com"
-		echo "$photourl"
+		echo "$userurl?utm_source=new-roses&utm_medium=referral"
 	fi
 }
 
@@ -133,7 +135,7 @@ save() {
 	if [[ -z "$quietmodeon" ]] ; then
 		echo "$savefile.png saved"
 	fi
-	if [[ "$notifyon" ]]
+	if [ -x "$notify" ]
 	then
 		notify-send -m "$savefile.png saved" -i "$savefile.png"	
 	fi
@@ -169,7 +171,7 @@ flags() {
 			quietmodeon="true"
 			;;
 			n)
-			notifyon="true"
+			notify="$(which notify-send)"
 			;;
 			h)
 			help
