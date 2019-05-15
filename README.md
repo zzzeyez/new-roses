@@ -3,7 +3,7 @@
 
 grab wallpapers from unsplash
 
-## use
+## usage
 run `new-roses` with or without a search term to retrieve a wallpaper
 ```
 new-roses nature
