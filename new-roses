@@ -44,6 +44,10 @@ getapi() {
 		jq ".results | .[$entry] .user .links .html" | tr -d '"')"
 	#photourl="$(echo "$searchjson" | \
 		#jq ".results | .[$entry] .links .html" | tr -d '"')"
+	if [[ "$username" = "null" ]] ; then
+		echo "no results found.  exiting.."
+		exit
+	fi
 	echo "$username" > "$unsplashartistfile"
 }
 
@@ -117,7 +121,7 @@ setwallpaper() {
 
 save() {
 	savedir="$1"
-	savename="$(cat $unsplashartistfile)"
+	savename="$(cat $unsplashartistfile | tr -cd "[:alnum:]\"\n")"
 	savefile="$savedir/${savename// /}"
 	if [[ -e $savefile.png ]] ; then
 	    i=2
@@ -150,7 +154,7 @@ optional arguments:
   -s '/path/to/dir/'	  save wallpaper to directory
   -n                      notify when finished (requires notify-send)
   -h                      display this help page and exit
-  -q                      quiet mode (print nothing)"
+  -q                      quiet mode (print nothing) \n"
 }
 
 flags() {
