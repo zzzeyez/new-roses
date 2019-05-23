@@ -9,8 +9,9 @@
 #unsplashapi=""
 
 wallpaper="/tmp/wallpaper.png"
-unsplashartistfile="/tmp/wallpaperartist"
-keyword="roses"
+artist_file="/tmp/wallpaperartist"
+keywords_file="/tmp/new-roses-keywords"
+default_keyword="roses"
 config="${HOME}/.config/new-roses"
 dummy="/tmp/dummy.png"
 
@@ -26,6 +27,16 @@ setup() {
 		echo "new-rose -a your_api_key"
 		echo "exiting.."
 		exit
+	fi
+	# if no keyword, grab a random one
+	if [[ -z "$keyword" ]] && [[ -f "$keywords_file" ]] ; then
+		shuf="$(command -v shuf)"
+		if [ -x "$shuf" ] ; then
+			keyword="$(cat $keywords_file | shuf -n 1)"
+		else
+			# or use default
+			keyword="$default_keyword"
+		fi
 	fi
 }
 
@@ -48,7 +59,7 @@ getapi() {
 		echo "no results found.  exiting.."
 		exit
 	fi
-	echo "$username" > "$unsplashartistfile"
+	echo "$username" > "$artist_file"
 }
 
 macwallpaper() {
@@ -116,20 +127,21 @@ setwallpaper() {
 	then
 		echo "photo by $username ($userscreenname) via unsplash.com"
 		echo "$userurl?utm_source=new-roses&utm_medium=referral"
+		echo "keyword: $keyword"
 	fi
 }
 
 save() {
 	savedir="$1"
-	savename="$(cat $unsplashartistfile | tr -cd "[:alnum:]\"\n")"
+	savename="$(cat $artist_file | tr -cd "[:alnum:]\"\n")"
 	savefile="$savedir/${savename// /}"
 	if [[ -e $savefile.png ]] ; then
-	    i=2
-	    while [[ -e $savefile$i.png ]] 
+		i=2
+		while [[ -e $savefile$i.png ]] 
 		do
-	        (( i++ ))
-	    done
-	    savefile=$savefile$i
+			(( i++ ))
+		done
+		savefile=$savefile$i
 	fi
 	cp "$wallpaper" "$savefile.png" &&
 	if [[ -z "$quietmodeon" ]] ; then
@@ -147,7 +159,7 @@ help() {
       [-a] [-n] [-s ~/download/dir] [-q]
        
 example: new-roses spring
-	 
+
 optional arguments:
   -a 'your_api_key'       tell new-roses API key
                           from https://unsplash.com/developers
@@ -187,7 +199,12 @@ flags() {
 	shift "$((OPTIND-1))" 
 	if [ "$1" != "-*" ] && [ "$1" ] ;
 	then
-		keyword="$1"
+		keyword="$1"	
+		query="$(cat $keywords_file | grep $keyword)"
+		if [[ -z "$query" ]] ; then
+			echo "$keyword" >> "$keywords_file"
+		fi
+		unset query
 	fi
 }
 
@@ -206,3 +223,4 @@ fi
 #    TO DO     #
 ################
 
+# combine $artist_file and $keywords_file
