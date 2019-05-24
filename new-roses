@@ -78,7 +78,7 @@ macwallpaper() {
 	*)
 		echo "error setting wallpaper" && exit 1
 	;;
-	esac						
+	esac
 }
 
 setwallpaper() {
