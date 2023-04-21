@@ -104,6 +104,8 @@ setwallpaper() {
 				fi
 				macwallpaper "$dummy"
 				macwallpaper "$wallpaper"
+			elif type -p swaybg >/dev/null; then
+				swaybg -i "$wallpaper"
 			elif type -p feh >/dev/null; then
 				feh --bg-fill "$wallpaper"
 			elif type -p nitrogen >/dev/null; then
